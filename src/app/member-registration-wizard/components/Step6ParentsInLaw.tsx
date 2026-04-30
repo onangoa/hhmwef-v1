@@ -19,6 +19,7 @@ export interface ParentInLawEntry {
   lastName: string;
   surname: string;
   relationship: string;
+  phoneNumber?: string;
 }
 
 interface Step6Props {
@@ -51,6 +52,7 @@ function InLawForm({
       lastName: entry.lastName,
       surname: entry.surname,
       relationship: entry.relationship,
+      phoneNumber: entry.phoneNumber,
     },
   });
 
@@ -106,7 +108,7 @@ function InLawForm({
 
       {expanded && (
         <div className="p-4 animate-slide-up">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-semibold text-foreground mb-1.5">
                 First Name <span className="text-red-500">*</span>
@@ -161,6 +163,18 @@ function InLawForm({
                 ))}
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-1.5">
+                Phone Number <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 0712345678"
+                {...register('phoneNumber', { required: true })}
+                onBlur={handleBlur}
+                className={inputClass(!!errors.phoneNumber)}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -172,13 +186,13 @@ export default function Step6ParentsInLaw({ defaultValues, onNext, onBack }: Ste
   const [entries, setEntries] = useState<ParentInLawEntry[]>(
     defaultValues?.length
       ? defaultValues
-      : [{ id: 'il-1', firstName: '', lastName: '', surname: '', relationship: '' }]
+      : [{ id: 'il-1', firstName: '', lastName: '', surname: '', relationship: '', phoneNumber: '' }]
   );
 
   const addEntry = () =>
     setEntries((prev) => [
       ...prev,
-      { id: `il-${Date.now()}`, firstName: '', lastName: '', surname: '', relationship: '' },
+      { id: `il-${Date.now()}`, firstName: '', lastName: '', surname: '', relationship: '', phoneNumber: '' },
     ]);
 
   const removeEntry = (id: string) => setEntries((prev) => prev.filter((e) => e.id !== id));

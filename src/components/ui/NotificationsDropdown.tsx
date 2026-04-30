@@ -70,10 +70,37 @@ export default function NotificationsDropdown({ memberId }: NotificationsDropdow
   }, []);
 
   useEffect(() => {
+    if (memberId) {
+      // Initial fetch for count
+      fetchUnreadCount();
+      
+      // Poll for updates every 10 seconds
+      const interval = setInterval(() => {
+        fetchUnreadCount();
+      }, 10000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [memberId]);
+
+  useEffect(() => {
     if (memberId && isOpen) {
       fetchNotifications();
     }
   }, [memberId, isOpen]);
+
+  const fetchUnreadCount = async () => {
+    if (!memberId) return;
+    try {
+      const response = await fetch(`/api/user-notifications?memberId=${memberId}&limit=1`);
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadCount(data.unreadCount || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
 
   const fetchNotifications = async () => {
     if (!memberId) return;

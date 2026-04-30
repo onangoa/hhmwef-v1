@@ -330,6 +330,7 @@ export default function ProfilePage() {
           lastName: '',
           surname: '',
           relationship: '',
+          phoneNumber: '',
         },
       ],
     });
@@ -352,6 +353,7 @@ export default function ProfilePage() {
           lastName: '',
           surname: '',
           relationship: '',
+          phoneNumber: '',
         },
       ],
     });
@@ -1367,6 +1369,22 @@ export default function ProfilePage() {
                               className="w-full px-2 py-1.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:bg-gray-50 disabled:text-gray-600"
                             />
                           </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                              Phone Number
+                            </label>
+                            <input
+                              type="tel"
+                              value={pg.phoneNumber || ''}
+                              onChange={(e) => {
+                                const newPG = [...formData.parentGuardians];
+                                newPG[index].phoneNumber = e.target.value;
+                                setFormData({ ...formData, parentGuardians: newPG });
+                              }}
+                              disabled={!editing}
+                              className="w-full px-2 py-1.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:bg-gray-50 disabled:text-gray-600"
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1471,6 +1489,22 @@ export default function ProfilePage() {
                               onChange={(e) => {
                                 const newPIL = [...formData.parentsInLaws];
                                 newPIL[index].relationship = e.target.value;
+                                setFormData({ ...formData, parentsInLaws: newPIL });
+                              }}
+                              disabled={!editing}
+                              className="w-full px-2 py-1.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:bg-gray-50 disabled:text-gray-600"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                              Phone Number
+                            </label>
+                            <input
+                              type="tel"
+                              value={pil.phoneNumber || ''}
+                              onChange={(e) => {
+                                const newPIL = [...formData.parentsInLaws];
+                                newPIL[index].phoneNumber = e.target.value;
                                 setFormData({ ...formData, parentsInLaws: newPIL });
                               }}
                               disabled={!editing}

@@ -22,6 +22,7 @@ export interface ParentGuardianEntry {
   lastName: string;
   surname: string;
   relationship: string;
+  phoneNumber?: string;
 }
 
 interface Step5Props {
@@ -56,6 +57,7 @@ function ParentForm({
       lastName: entry.lastName,
       surname: entry.surname,
       relationship: entry.relationship,
+      phoneNumber: entry.phoneNumber,
     },
   });
 
@@ -111,7 +113,7 @@ function ParentForm({
 
       {expanded && (
         <div className="p-4 animate-slide-up">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-semibold text-foreground mb-1.5">
                 First Name <span className="text-red-500">*</span>
@@ -166,6 +168,18 @@ function ParentForm({
                 ))}
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-1.5">
+                Phone Number <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 0712345678"
+                {...register('phoneNumber', { required: true })}
+                onBlur={handleBlur}
+                className={inputClass(!!errors.phoneNumber)}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -177,13 +191,13 @@ export default function Step5ParentGuardians({ defaultValues, onNext, onBack }: 
   const [entries, setEntries] = useState<ParentGuardianEntry[]>(
     defaultValues?.length
       ? defaultValues
-      : [{ id: 'pg-1', firstName: '', lastName: '', surname: '', relationship: '' }]
+      : [{ id: 'pg-1', firstName: '', lastName: '', surname: '', relationship: '', phoneNumber: '' }]
   );
 
   const addEntry = () =>
     setEntries((prev) => [
       ...prev,
-      { id: `pg-${Date.now()}`, firstName: '', lastName: '', surname: '', relationship: '' },
+      { id: `pg-${Date.now()}`, firstName: '', lastName: '', surname: '', relationship: '', phoneNumber: '' },
     ]);
 
   const removeEntry = (id: string) => setEntries((prev) => prev.filter((e) => e.id !== id));

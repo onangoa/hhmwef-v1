@@ -209,6 +209,7 @@ model ParentGuardian {
   lastName      String
   surname       String?
   relationship  String
+  phoneNumber   String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -224,6 +225,7 @@ model ParentInLaw {
   lastName      String
   surname       String?
   relationship  String
+  phoneNumber   String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

@@ -431,39 +431,60 @@ export default function EditMemberPage() {
                 </h3>
                 <div className="space-y-4">
                   {(formData.parentGuardians || []).map((pg: any, index: number) => (
-                    <div key={index} className="p-4 border border-border rounded-xl grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className={labelClass}>Name</label>
-                        <input 
-                          type="text" value={pg.firstName + ' ' + (pg.lastName || '')} 
-                          onChange={(e) => {
-                            const [f, ...l] = e.target.value.split(' ');
-                            handleArrayChange('parentGuardians', index, 'firstName', f);
-                            handleArrayChange('parentGuardians', index, 'lastName', l.join(' '));
-                          }} 
-                          className={inputClass} 
-                        />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Relationship</label>
-                        <input 
-                          type="text" value={pg.relationship || ''} 
-                          onChange={(e) => handleArrayChange('parentGuardians', index, 'relationship', e.target.value)} 
-                          className={inputClass} 
-                        />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Phone Number</label>
-                        <input 
-                          type="text" value={pg.phoneNumber || ''} 
-                          onChange={(e) => handleArrayChange('parentGuardians', index, 'phoneNumber', e.target.value)} 
-                          className={inputClass} 
-                        />
+                    <div key={index} className="p-4 border border-border rounded-xl relative">
+                      <button 
+                        onClick={() => removeArrayItem('parentGuardians', index)}
+                        className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-1.5 rounded-lg"
+                      >
+                        Remove
+                      </button>
+                      <h3 className="text-sm font-bold mb-4">Parent/Guardian #{index + 1}</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                          <label className={labelClass}>First Name</label>
+                          <input 
+                            type="text" value={pg.firstName || ''} 
+                            onChange={(e) => handleArrayChange('parentGuardians', index, 'firstName', e.target.value)} 
+                            className={inputClass} 
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Last Name</label>
+                          <input 
+                            type="text" value={pg.lastName || ''} 
+                            onChange={(e) => handleArrayChange('parentGuardians', index, 'lastName', e.target.value)} 
+                            className={inputClass} 
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Surname</label>
+                          <input 
+                            type="text" value={pg.surname || ''} 
+                            onChange={(e) => handleArrayChange('parentGuardians', index, 'surname', e.target.value)} 
+                            className={inputClass} 
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Relationship</label>
+                          <input 
+                            type="text" value={pg.relationship || ''} 
+                            onChange={(e) => handleArrayChange('parentGuardians', index, 'relationship', e.target.value)} 
+                            className={inputClass} 
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Phone Number</label>
+                          <input 
+                            type="text" value={pg.phoneNumber || ''} 
+                            onChange={(e) => handleArrayChange('parentGuardians', index, 'phoneNumber', e.target.value)} 
+                            className={inputClass} 
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
                   <button 
-                    onClick={() => addArrayItem('parentGuardians', { firstName: '', lastName: '', relationship: '', phoneNumber: '' })}
+                    onClick={() => addArrayItem('parentGuardians', { firstName: '', lastName: '', surname: '', relationship: '', phoneNumber: '' })}
                     className="w-full py-2.5 border-2 border-dashed border-border rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted transition-all"
                   >
                     + Add Parent/Guardian
@@ -478,34 +499,55 @@ export default function EditMemberPage() {
                 </h3>
                 <div className="space-y-4">
                   {(formData.parentsInLaws || []).map((pil: any, index: number) => (
-                    <div key={index} className="p-4 border border-border rounded-xl grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className={labelClass}>Name</label>
-                        <input 
-                          type="text" value={pil.firstName + ' ' + (pil.lastName || '')} 
-                          onChange={(e) => {
-                            const [f, ...l] = e.target.value.split(' ');
-                            handleArrayChange('parentsInLaws', index, 'firstName', f);
-                            handleArrayChange('parentsInLaws', index, 'lastName', l.join(' '));
-                          }} 
-                          className={inputClass} 
-                        />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Relationship</label>
-                        <input 
-                          type="text" value={pil.relationship || ''} 
-                          onChange={(e) => handleArrayChange('parentsInLaws', index, 'relationship', e.target.value)} 
-                          className={inputClass} 
-                        />
-                      </div>
-                      <div>
-                        <label className={labelClass}>Phone Number</label>
-                        <input 
-                          type="text" value={pil.phoneNumber || ''} 
-                          onChange={(e) => handleArrayChange('parentsInLaws', index, 'phoneNumber', e.target.value)} 
-                          className={inputClass} 
-                        />
+                    <div key={index} className="p-4 border border-border rounded-xl relative">
+                      <button 
+                        onClick={() => removeArrayItem('parentsInLaws', index)}
+                        className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-1.5 rounded-lg"
+                      >
+                        Remove
+                      </button>
+                      <h3 className="text-sm font-bold mb-4">Parent-in-Law #{index + 1}</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                          <label className={labelClass}>First Name</label>
+                          <input 
+                            type="text" value={pil.firstName || ''} 
+                            onChange={(e) => handleArrayChange('parentsInLaws', index, 'firstName', e.target.value)} 
+                            className={inputClass} 
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Last Name</label>
+                          <input 
+                            type="text" value={pil.lastName || ''} 
+                            onChange={(e) => handleArrayChange('parentsInLaws', index, 'lastName', e.target.value)} 
+                            className={inputClass} 
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Surname</label>
+                          <input 
+                            type="text" value={pil.surname || ''} 
+                            onChange={(e) => handleArrayChange('parentsInLaws', index, 'surname', e.target.value)} 
+                            className={inputClass} 
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Relationship</label>
+                          <input 
+                            type="text" value={pil.relationship || ''} 
+                            onChange={(e) => handleArrayChange('parentsInLaws', index, 'relationship', e.target.value)} 
+                            className={inputClass} 
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Phone Number</label>
+                          <input 
+                            type="text" value={pil.phoneNumber || ''} 
+                            onChange={(e) => handleArrayChange('parentsInLaws', index, 'phoneNumber', e.target.value)} 
+                            className={inputClass} 
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
