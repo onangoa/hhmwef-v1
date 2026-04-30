@@ -1,0 +1,97 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const welfareCase = await prisma.welfareCase.findUnique({
+      where: { id: params.id },
+      include: {
+        member: true,
+        committeeDecisions: {
+          include: {
+            member: {
+              select: {
+                firstName: true,
+                lastName: true,
+                groupRole: true,
+              },
+            },
+          },
+          orderBy: { decidedAt: 'desc' },
+        },
+        disbursements: {
+          include: {
+            member: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+        contributions: {
+          include: {
+            contribution: {
+              include: {
+                member: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!welfareCase) {
+      return NextResponse.json({ error: 'Welfare case not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(welfareCase);
+  } catch (error) {
+    console.error('Error fetching welfare case:', error);
+    return NextResponse.json({ error: 'Failed to fetch welfare case' }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const body = await request.json();
+
+    const welfareCase = await prisma.welfareCase.update({
+      where: { id: params.id },
+      data: {
+        status: body.status,
+        amountApproved: body.amountApproved,
+        description: body.description,
+        supportingDocs: body.supportingDocs,
+      },
+      include: {
+        member: true,
+        committeeDecisions: true,
+        disbursements: true,
+      },
+    });
+
+    return NextResponse.json(welfareCase);
+  } catch (error) {
+    console.error('Error updating welfare case:', error);
+    return NextResponse.json({ error: 'Failed to update welfare case' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    await prisma.welfareCase.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({ message: 'Welfare case deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting welfare case:', error);
+    return NextResponse.json({ error: 'Failed to delete welfare case' }, { status: 500 });
+  }
+}

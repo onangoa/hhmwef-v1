@@ -1,0 +1,452 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TREASURER
+  SECRETARY
+  MEMBER
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum EmploymentStatus {
+  IN_SERVICE
+  RETIREE
+}
+
+enum CaseType {
+  MEDICAL
+  BEREAVEMENT
+  EMERGENCY
+}
+
+enum CaseStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  DISBURSED
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+  DEFERRED
+}
+
+enum ContributionStatus {
+  PENDING
+  VERIFIED
+  RECONCILED
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum PaymentMethod {
+  MPESA
+  BANK_TRANSFER
+  CASH
+  CHEQUE
+}
+
+enum NotificationType {
+  SMS
+  EMAIL
+  BOTH
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum DocumentType {
+  ID
+  BIRTH_CERTIFICATE
+  PASSPORT
+  OTHER
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  password          String
+  role              Role     @default(MEMBER)
+  memberId          String?  @unique
+  mustChangePassword Boolean  @default(true)
+  lastPasswordChange DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  member            Member?            @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@index([memberId])
+}
+
+model Member {
+  id                        String            @id @default(cuid())
+  firstName                 String
+  lastName                  String
+  surname                   String?
+  idNumber                  String            @unique
+  dateOfBirth               DateTime
+  ministry                  String
+  stateDepartment           String
+  payrollNumber             String            @unique
+  phoneNumber               String
+  alternativePhone          String?
+  email                     String            @unique
+  postalAddress             String?
+  employmentStatus          EmploymentStatus  @default(IN_SERVICE)
+  memberStatus              MemberStatus      @default(INACTIVE)
+  hasAgreedToTerms          Boolean           @default(false)
+  registrationDate          DateTime          @default(now())
+  approvalDate              DateTime?
+  approvedBy                String?
+  groupRole                 String?
+  notificationEmailEnabled    Boolean           @default(true)
+  notificationSmsEnabled      Boolean           @default(false)
+  contributionAlerts         Boolean           @default(true)
+  welfareAlerts             Boolean           @default(true)
+  systemAlerts              Boolean           @default(true)
+
+  user                User?
+  spouse              Spouse?
+  nextOfKins          NextOfKin[]
+  children            Child[]
+  parentGuardians     ParentGuardian[]
+  parentsInLaws       ParentInLaw[]
+  contributions       Contribution[]
+  welfareCases        WelfareCase[]
+  committeeDecisions  CommitteeDecision[]
+  notifications       Notification[]
+  userNotifications   UserNotification[]
+  disbursements       Disbursement[]    @relation("DisbursedByMember")
+  documents           Document[]
+
+  @@unique([email, idNumber])
+  @@index([payrollNumber])
+  @@index([email])
+  @@index([memberStatus])
+  @@index([ministry])
+}
+
+model NextOfKin {
+  id            String    @id @default(cuid())
+  memberId      String
+  firstName     String
+  lastName      String
+  surname       String?
+  idNumber      String
+  address       String?
+  phoneNumber   String?
+  email         String?
+  relationship  String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  member        Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+}
+
+model Spouse {
+  id            String    @id @default(cuid())
+  memberId      String    @unique
+  firstName     String
+  lastName      String
+  surname       String?
+  address       String?
+  idNumber      String
+  phoneNumber   String?
+  email         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  member        Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+}
+
+model Child {
+  id            String    @id @default(cuid())
+  memberId      String
+  firstName     String
+  lastName      String
+  surname       String?
+  phoneNumber   String?
+  dateOfBirth   DateTime
+  birthCertNo   String
+  idNumber      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  member        Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+}
+
+model ParentGuardian {
+  id            String    @id @default(cuid())
+  memberId      String
+  firstName     String
+  lastName      String
+  surname       String?
+  relationship  String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  member        Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+}
+
+model ParentInLaw {
+  id            String    @id @default(cuid())
+  memberId      String
+  firstName     String
+  lastName      String
+  surname       String?
+  relationship  String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  member        Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+}
+
+model Contribution {
+  id                    String              @id @default(cuid())
+  memberId              String
+  amount                Decimal
+  paymentMethod         PaymentMethod
+  mpesaConfirmation     String?
+  reference             String?
+  month                 Int
+  year                  Int
+  status                ContributionStatus  @default(PENDING)
+  arrears               Decimal             @default(0)
+  penalty               Decimal             @default(0)
+  verifiedBy            String?
+  verifiedAt            DateTime?
+  receiptSent           Boolean             @default(false)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  member                Member              @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  caseContributions     CaseContribution[]
+
+  @@index([memberId])
+  @@index([month, year])
+  @@index([status])
+}
+
+model WelfareCase {
+  id                    String              @id @default(cuid())
+  caseNumber            String              @unique
+  memberId              String
+  type                  CaseType
+  status                CaseStatus          @default(PENDING)
+  title                 String
+  description           String
+  amountRequested       Decimal
+  amountApproved        Decimal             @default(0)
+  supportingDocs        Json?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  member                Member              @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  committeeDecisions    CommitteeDecision[]
+  disbursements         Disbursement[]
+  contributions         CaseContribution[]
+
+  @@index([memberId])
+  @@index([caseNumber])
+  @@index([status])
+  @@index([type])
+}
+
+model CommitteeDecision {
+  id                String            @id @default(cuid())
+  caseId            String
+  memberId          String
+  role              String
+  decision          ApprovalDecision
+  comment           String?
+  decidedAt         DateTime          @default(now())
+  createdAt         DateTime          @default(now())
+
+  case              WelfareCase       @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  member            Member            @relation(fields: [memberId], references: [id])
+
+  @@index([caseId])
+  @@index([memberId])
+}
+
+model Disbursement {
+  id                String        @id @default(cuid())
+  caseId            String
+  memberId          String
+  amount            Decimal
+  method            PaymentMethod
+  reference         String
+  disbursedAt       DateTime      @default(now())
+  disbursedBy       String
+
+  case              WelfareCase   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  member            Member        @relation("DisbursedByMember", fields: [memberId], references: [id])
+
+  @@index([caseId])
+  @@index([memberId])
+}
+
+model CaseContribution {
+  id            String      @id @default(cuid())
+  caseId        String
+  contributionId String
+  createdAt     DateTime    @default(now())
+
+  case          WelfareCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  contribution   Contribution @relation(fields: [contributionId], references: [id], onDelete: Cascade)
+
+  @@unique([caseId, contributionId])
+  @@index([caseId])
+  @@index([contributionId])
+}
+
+model Budget {
+  id          String    @id @default(cuid())
+  year        Int       @unique
+  category    String
+  amount      Decimal
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  transactions Transaction[]
+
+  @@index([year])
+}
+
+model Transaction {
+  id          String        @id @default(cuid())
+  budgetId    String?
+  type        TransactionType
+  category    String
+  description String
+  amount      Decimal
+  reference   String
+  date        DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  budget      Budget?       @relation(fields: [budgetId], references: [id])
+
+  @@index([type])
+  @@index([date])
+  @@index([category])
+}
+
+model Notification {
+  id            String              @id @default(cuid())
+  memberId      String
+  type          NotificationType
+  status        NotificationStatus  @default(PENDING)
+  subject       String
+  message       String
+  recipient     String
+  sentAt        DateTime?
+  failedReason  String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  member        Member              @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([status])
+  @@index([type])
+}
+
+enum UserNotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  CONTRIBUTION
+  WELFARE
+  SYSTEM
+}
+
+enum UserNotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+model UserNotification {
+  id          String                   @id @default(cuid())
+  memberId    String
+  type        UserNotificationType     @default(INFO)
+  status      UserNotificationStatus   @default(UNREAD)
+  title       String
+  message     String
+  link        String?
+  icon        String?
+  createdAt   DateTime                 @default(now())
+  readAt      DateTime?
+
+  member      Member                   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  audience    String?
+  sentAt      DateTime  @default(now())
+  sentBy      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([sentAt])
+}
+
+model Document {
+  id            String        @id @default(cuid())
+  memberId      String
+  fileName      String
+  originalName  String
+  documentType  DocumentType
+  fileSize      Int
+  mimeType      String
+  filePath      String
+  description   String?
+  uploadedAt    DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  member        Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([documentType])
+}
