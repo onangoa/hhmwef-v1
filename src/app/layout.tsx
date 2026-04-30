@@ -4,6 +4,7 @@ import '../styles/tailwind.css';
 import { Toaster } from 'sonner';
 import { PageTransitionProvider } from '@/components/PageTransitionContext';
 import PageTransitionLoader from '@/components/PageTransitionLoader';
+import { UserProvider } from '@/lib/user-context';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -23,10 +24,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        <PageTransitionProvider>
-          {children}
-          <PageTransitionLoader />
-        </PageTransitionProvider>
+        <UserProvider>
+          <PageTransitionProvider>
+            {children}
+            <PageTransitionLoader />
+          </PageTransitionProvider>
+        </UserProvider>
         <Toaster
           position="bottom-right"
           toastOptions={{

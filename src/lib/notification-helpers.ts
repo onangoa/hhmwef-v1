@@ -51,6 +51,69 @@ export async function notifyMemberApproved(memberId: string) {
   });
 }
 
+// Example: Creating a notification when member is rejected
+export async function notifyMemberRejected(memberId: string, reason?: string) {
+  await createUserNotification({
+    memberId,
+    type: 'WARNING',
+    title: 'Membership Application Rejected',
+    message: reason || 'Your membership application has been rejected. Please contact the SACCO office for more information.',
+    icon: '❌',
+  });
+}
+
+// Payment reminder notifications
+export async function notifyUpcomingPayment(memberId: string, dueDate: Date) {
+  const formattedDate = dueDate.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  
+  await createUserNotification({
+    memberId,
+    type: 'WARNING',
+    title: 'Payment Due Notice',
+    message: `Your monthly contribution payment is due on ${formattedDate}. Please ensure timely payment to avoid any penalties.`,
+    icon: '💰',
+    link: '/member-dashboard/contributions',
+  });
+}
+
+export async function notifyOverduePayment(memberId: string, dueDate: Date) {
+  const formattedDate = dueDate.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  
+  await createUserNotification({
+    memberId,
+    type: 'ERROR',
+    title: 'Payment Overdue Notice',
+    message: `Your monthly contribution payment for ${formattedDate} is overdue. Please make payment immediately to avoid further action.`,
+    icon: '⚠️',
+    link: '/member-dashboard/contributions',
+  });
+}
+
+export async function notifyDefaultStatus(memberId: string, dueDate: Date) {
+  const formattedDate = dueDate.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  
+  await createUserNotification({
+    memberId,
+    type: 'ERROR',
+    title: 'Member Marked as Default',
+    message: `You have been marked as in default for failing to pay the contribution due on ${formattedDate}. Please contact the SACCO office immediately.`,
+    icon: '❌',
+    link: '/member-dashboard/contributions',
+  });
+}
+
 // Example: Creating a system announcement for all members
 import { createBulkNotifications } from '@/lib/notifications';
 import { prisma } from '@/lib/db';

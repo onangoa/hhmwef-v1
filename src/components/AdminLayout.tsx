@@ -291,19 +291,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </nav>
 
-      {/* Register Link */}
-      {(!collapsed || isMobile) && (
-        <div className="px-3 pb-3">
-          <Link
-            href="/member-dashboard/profile"
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-200 hover:bg-blue-500/30 hover:text-white transition-all duration-150 text-sm font-medium"
-          >
-            <UserPlus size={16} />
-            <span>My Profile</span>
-          </Link>
-        </div>
-      )}
-
       {/* User Profile */}
       <div
         className={`border-t border-blue-800/40 p-3 ${collapsed && !isMobile ? 'flex justify-center' : ''}`}

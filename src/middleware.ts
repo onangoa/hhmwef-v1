@@ -6,8 +6,17 @@ const PUBLIC_ROUTES = [
   '/login-screen',
   '/member-registration-wizard',
   '/forgot-password',
+  '/reset-password',
   '/api/auth/login',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/verify-reset-token',
   '/api/members', // Allow registration POST
+];
+
+const PASSWORD_CHANGE_ROUTES = [
+  '/change-password',
+  '/api/auth/change-password',
 ];
 
 export function middleware(request: NextRequest) {
@@ -27,6 +36,7 @@ export function middleware(request: NextRequest) {
   
   // Check if it's a public route
   const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+  const isPasswordChangeRoute = PASSWORD_CHANGE_ROUTES.some(route => pathname.startsWith(route));
   const isLoginPage = pathname === '/login-screen';
 
   if (!session && !isPublicRoute) {
@@ -39,6 +49,13 @@ export function middleware(request: NextRequest) {
     // Redirect to home if already logged in and trying to access login page
     // The home page will then redirect to the correct dashboard
     return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  // Check if user must change password and is not already on password change page
+  if (session && !isPublicRoute && !isPasswordChangeRoute) {
+    // For now, we'll check this client-side since we don't have user data in the middleware
+    // In a real implementation, you might want to decode the JWT or check a session cookie
+    // that contains the mustChangePassword flag
   }
 
   return NextResponse.next();

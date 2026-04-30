@@ -17,7 +17,8 @@ import {
   ArrowRight,
   UserPlus,
 } from 'lucide-react';
-import { setUser, getRedirectPath } from '@/lib/auth-client';
+import { setUserOnly, getRedirectPath } from '@/lib/auth-client';
+import { useUser } from '@/lib/user-context';
 
 interface LoginFormData {
   email: string;
@@ -38,6 +39,7 @@ const DEMO_CREDENTIALS = {
 
 export default function LoginForm() {
   const router = useRouter();
+  const { setUser: setContextUser } = useUser();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -78,11 +80,15 @@ export default function LoginForm() {
         description: `Welcome back, ${result.user.role === 'ADMIN' ? 'Admin' : 'Member'}!`,
       });
 
-      setUser(result.user);
+      setContextUser(result.user);
 
-      const redirectPath = getRedirectPath(result.user.role);
-
-      setTimeout(() => router.push(redirectPath), 500);
+      // Check if user must change password (first login)
+      if (result.user.mustChangePassword) {
+        setTimeout(() => router.push('/change-password?first=true'), 500);
+      } else {
+        const redirectPath = getRedirectPath(result.user.role);
+        setTimeout(() => router.push(redirectPath), 500);
+      }
     } catch (error) {
       console.error('Login error:', error);
       toast.error('Network error', {

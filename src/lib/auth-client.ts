@@ -21,7 +21,7 @@ export function getUser(): User | null {
   }
 }
 
-export function setUser(user: User): void {
+export function setUserOnly(user: User): void {
   if (typeof window === 'undefined') return;
 
   localStorage.setItem('user', JSON.stringify(user));

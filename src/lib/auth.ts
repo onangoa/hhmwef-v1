@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const SALT_ROUNDS = 10;
+const RESET_TOKEN_EXPIRY_HOURS = 1;
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, SALT_ROUNDS);
@@ -24,4 +26,18 @@ export function isPasswordStrong(password: string): boolean {
   return (
     password.length >= minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar
   );
+}
+
+export function generatePasswordResetToken(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+export function generatePasswordResetExpiry(): Date {
+  const expiry = new Date();
+  expiry.setHours(expiry.getHours() + RESET_TOKEN_EXPIRY_HOURS);
+  return expiry;
+}
+
+export function isResetTokenValid(tokenExpiry: Date): boolean {
+  return new Date() < tokenExpiry;
 }

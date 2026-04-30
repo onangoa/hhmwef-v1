@@ -144,15 +144,6 @@ export default function NotificationSettings() {
             </label>
           </div>
         </div>
-
-        {(preferences.emailEnabled || preferences.smsEnabled) && (
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-xs text-yellow-800">
-              <strong>Note:</strong> Email notifications are currently active. SMS notifications
-              will be implemented in a future update.
-            </p>
-          </div>
-        )}
       </div>
 
       <div>

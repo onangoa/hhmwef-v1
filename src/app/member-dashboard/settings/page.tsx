@@ -149,16 +149,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-muted-foreground">Role</p>
                   <p className="text-sm font-medium text-foreground mt-0.5">{user?.role}</p>
                 </div>
-                {user?.mustChangePassword && (
-                  <div className="py-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-amber-800 mb-1">
-                      Password Change Required
-                    </p>
-                    <p className="text-xs text-amber-700">
-                      You must change your password to continue using the system.
-                    </p>
-                  </div>
-                )}
+                
               </div>
             </div>
 

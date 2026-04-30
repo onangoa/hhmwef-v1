@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const body = await request.json();
     const { memberId, amount, method, reference } = body;
+    
+    // Await the params to get the id
+    const { id } = await params;
 
     const welfareCase = await prisma.welfareCase.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!welfareCase) {
       return NextResponse.json({ error: 'Welfare case not found' }, { status: 404 });
     }
 
-    if (welfareCase.status !== 'APPROVED') {
+    if (welfareCase.status !== 'APPROVED' && welfareCase.status !== 'DISBURSED') {
       return NextResponse.json(
         { error: 'Welfare case must be approved before disbursement' },
         { status: 400 }
@@ -23,7 +26,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const disbursement = await prisma.disbursement.create({
       data: {
-        caseId: params.id,
+        caseId: id,
         memberId,
         amount,
         method,
@@ -41,7 +44,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     });
 
     await prisma.welfareCase.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: 'DISBURSED' },
     });
 

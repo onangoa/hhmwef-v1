@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import MemberLayout from '@/components/MemberLayout';
-import { getUser, setUser } from '@/lib/auth-client';
+import { getUser, setUserOnly as setUser } from '@/lib/auth-client';
 import { toast } from 'sonner';
 import {
   User,
