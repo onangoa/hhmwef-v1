@@ -1,13 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { memberId, role, decision, comment } = body;
 
+    // Validate the decision value
+    const validDecisions = ['APPROVED', 'REJECTED', 'DEFERRED'];
+    if (!validDecisions.includes(decision)) {
+      return NextResponse.json({ 
+        error: `Invalid decision value: ${decision}. Must be one of: ${validDecisions.join(', ')}` 
+      }, { status: 400 });
+    }
+
+    // Validate that the member exists
+    const member = await prisma.user.findUnique({
+      where: { id: memberId }
+    });
+
+    if (!member) {
+      return NextResponse.json({ 
+        error: `Member with ID ${memberId} not found` 
+      }, { status: 404 });
+    }
+
     const welfareCase = await prisma.welfareCase.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         committeeDecisions: true,
       },
@@ -28,7 +48,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const committeeDecision = await prisma.committeeDecision.create({
       data: {
-        caseId: params.id,
+        caseId: id,
         memberId,
         role,
         decision,
@@ -46,7 +66,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     });
 
     const allDecisions = await prisma.committeeDecision.findMany({
-      where: { caseId: params.id },
+      where: { caseId: id },
     });
 
     if (allDecisions.length >= 3) {
@@ -65,7 +85,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
       if (newStatus !== welfareCase.status) {
         await prisma.welfareCase.update({
-          where: { id: params.id },
+          where: { id },
           data: { status: newStatus },
         });
       }

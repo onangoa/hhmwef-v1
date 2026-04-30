@@ -40,7 +40,7 @@ function transformWelfareCase(apiCase: any): WelfareCase {
       id: d.id,
       memberName: `${d.member.firstName} ${d.member.lastName}`,
       role: d.role,
-      decision: d.decision.toLowerCase() as any,
+      decision: d.decision as any,
       comment: d.comment || '',
       decidedAt: new Date(d.decidedAt).toLocaleDateString('en-GB', {
         day: '2-digit',
@@ -94,9 +94,9 @@ const DECISION_CONFIG: Record<
   ApprovalDecision,
   { label: string; color: string; bg: string; icon: React.ElementType }
 > = {
-  approved: { label: 'Approved', color: 'text-green-700', bg: 'bg-green-100', icon: CheckCircle2 },
-  rejected: { label: 'Rejected', color: 'text-red-600', bg: 'bg-red-100', icon: XCircle },
-  deferred: { label: 'Deferred', color: 'text-amber-700', bg: 'bg-amber-100', icon: Clock },
+  APPROVED: { label: 'Approved', color: 'text-green-700', bg: 'bg-green-100', icon: CheckCircle2 },
+  REJECTED: { label: 'Rejected', color: 'text-red-600', bg: 'bg-red-100', icon: XCircle },
+  DEFERRED: { label: 'Deferred', color: 'text-amber-700', bg: 'bg-amber-100', icon: Clock },
 };
 
 export default function WelfareCaseModal({
@@ -111,7 +111,7 @@ export default function WelfareCaseModal({
   const [newDecision, setNewDecision] = useState({
     memberId: '',
     role: '',
-    decision: 'approved' as ApprovalDecision,
+    decision: 'APPROVED' as ApprovalDecision,
     comment: '',
   });
   const [newDisbursement, setNewDisbursement] = useState({
@@ -144,7 +144,7 @@ export default function WelfareCaseModal({
           id: data.decision.id,
           memberName: `${data.decision.member.firstName} ${data.decision.member.lastName}`,
           role: data.decision.role,
-          decision: data.decision.decision.toLowerCase() as ApprovalDecision,
+          decision: data.decision.decision as ApprovalDecision,
           comment: data.decision.comment || '',
           decidedAt: new Date(data.decision.decidedAt).toLocaleDateString('en-GB', {
             day: 'numeric',
@@ -162,7 +162,7 @@ export default function WelfareCaseModal({
             committeeDecisions: [...welfareCase.committeeDecisions, decision],
           });
         }
-        setNewDecision({ memberId: '', role: '', decision: 'approved', comment: '' });
+        setNewDecision({ memberId: '', role: '', decision: 'APPROVED', comment: '' });
         setShowAddDecision(false);
       } else {
         const error = await response.json();
@@ -427,9 +427,9 @@ export default function WelfareCaseModal({
                         })
                       }
                     >
-                      <option value="approved">Approved</option>
-                      <option value="rejected">Rejected</option>
-                      <option value="deferred">Deferred</option>
+                      <option value="APPROVED">Approved</option>
+                      <option value="REJECTED">Rejected</option>
+                      <option value="DEFERRED">Deferred</option>
                     </select>
                   </div>
                   <div>
@@ -746,7 +746,7 @@ export default function WelfareCaseModal({
                   return (
                     <div key={d.id} className="relative">
                       <div
-                        className={`absolute -left-4 w-4 h-4 rounded-full border-2 border-white shadow-sm ${d.decision === 'approved' ? 'bg-green-500' : d.decision === 'rejected' ? 'bg-red-500' : 'bg-amber-500'}`}
+                        className={`absolute -left-4 w-4 h-4 rounded-full border-2 border-white shadow-sm ${d.decision === 'APPROVED' ? 'bg-green-500' : d.decision === 'REJECTED' ? 'bg-red-500' : 'bg-amber-500'}`}
                       />
                       <div className="bg-white border border-border rounded-xl p-3">
                         <p className="text-xs font-semibold text-foreground">
