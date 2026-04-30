@@ -124,7 +124,7 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
         <div className="space-y-1 mb-6">
           {NAV_ITEMS.filter((n) => n.group === 'main').map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || pathname?.startsWith(item.href);
+            const isActive = pathname === item.href;
             return (
               <Link
                 key={item.id}

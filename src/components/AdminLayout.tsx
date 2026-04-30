@@ -181,8 +181,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             .filter((n) => n.group === 'main')
             .map((item) => {
               const Icon = item.icon;
-              const isActive =
-                pathname === item.href || pathname?.startsWith(item.href.split('#')[0]);
+              const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.id}

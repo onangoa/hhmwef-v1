@@ -57,6 +57,47 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const body = await request.json();
+
+    // Check if welfare case exists and is still pending
+    const existingCase = await prisma.welfareCase.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!existingCase) {
+      return NextResponse.json({ error: 'Welfare case not found' }, { status: 404 });
+    }
+
+    if (existingCase.status !== 'PENDING') {
+      return NextResponse.json({ 
+        error: 'Only pending welfare cases can be edited' 
+      }, { status: 400 });
+    }
+
+    const welfareCase = await prisma.welfareCase.update({
+      where: { id: params.id },
+      data: {
+        type: body.type,
+        title: body.title,
+        description: body.description,
+        amountRequested: body.amountRequested,
+      },
+      include: {
+        member: true,
+        committeeDecisions: true,
+        disbursements: true,
+      },
+    });
+
+    return NextResponse.json(welfareCase);
+  } catch (error) {
+    console.error('Error updating welfare case:', error);
+    return NextResponse.json({ error: 'Failed to update welfare case' }, { status: 500 });
+  }
+}
+
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await request.json();

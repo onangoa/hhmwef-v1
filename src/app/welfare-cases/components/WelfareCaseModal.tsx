@@ -428,8 +428,8 @@ export default function WelfareCaseModal({
                       >
                         <option value="">Select a committee member</option>
                         {committeeMembers.map((member) => (
-                          <option key={member.id} value={member.memberId}>
-                            {member.member ? `${member.member.firstName} ${member.member.lastName} (${member.role})` : `${member.email} (${member.role})`}
+                          <option key={member.id} value={member.id}>
+                            {member.firstName} {member.lastName} ({member.user?.role})
                           </option>
                         ))}
                       </select>
@@ -502,7 +502,7 @@ export default function WelfareCaseModal({
               ) : (
                 <div className="space-y-3">
                   {welfareCase.committeeDecisions.map((d) => {
-                    const dc = DECISION_CONFIG[d.decision];
+                    const dc = DECISION_CONFIG[d.decision.toUpperCase() as ApprovalDecision];
                     const DIcon = dc.icon;
                     return (
                       <div key={d.id} className="bg-white border border-border rounded-xl p-4">
@@ -534,7 +534,7 @@ export default function WelfareCaseModal({
               {/* Vote summary */}
               {welfareCase.committeeDecisions.length > 0 && (
                 <div className="bg-muted/40 rounded-xl p-4 grid grid-cols-3 gap-3 text-center">
-                  {(['approved', 'rejected', 'deferred'] as ApprovalDecision[]).map((d) => {
+                  {(['APPROVED', 'REJECTED', 'DEFERRED'] as ApprovalDecision[]).map((d) => {
                     const count = welfareCase.committeeDecisions.filter(
                       (cd) => cd.decision === d
                     ).length;
@@ -779,7 +779,7 @@ export default function WelfareCaseModal({
                 </div>
 
                 {welfareCase.committeeDecisions.map((d, i) => {
-                  const dc = DECISION_CONFIG[d.decision];
+                  const dc = DECISION_CONFIG[d.decision.toUpperCase() as ApprovalDecision];
                   return (
                     <div key={d.id} className="relative">
                       <div

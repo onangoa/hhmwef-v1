@@ -20,6 +20,7 @@ import {
   Loader2,
   Edit2,
   ChevronLeft,
+  ChevronRight,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';

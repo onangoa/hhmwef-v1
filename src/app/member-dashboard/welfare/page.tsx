@@ -20,6 +20,7 @@ import {
   File,
   Trash2,
   Eye,
+  Edit,
 } from 'lucide-react';
 
 export default function WelfareCasesPage() {
@@ -29,6 +30,8 @@ export default function WelfareCasesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedCase, setSelectedCase] = useState<any>(null);
   const [formData, setFormData] = useState({
     type: 'MEDICAL',
     title: '',
@@ -109,6 +112,46 @@ export default function WelfareCasesPage() {
     } catch (error) {
       console.error('Error deleting welfare case:', error);
       toast.error('Failed to delete welfare case');
+    }
+  };
+
+  const handleEditCase = async (welfareCase: any) => {
+    setSelectedCase(welfareCase);
+    setFormData({
+      type: welfareCase.type,
+      title: welfareCase.title,
+      description: welfareCase.description,
+      amountRequested: welfareCase.amountRequested.toString(),
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateCase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!selectedCase) return;
+
+      const response = await fetch(`/api/welfare-cases/${selectedCase.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          amountRequested: parseFloat(formData.amountRequested),
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Welfare case updated successfully');
+        setShowEditModal(false);
+        setSelectedCase(null);
+        fetchCases();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Failed to update welfare case');
+      }
+    } catch (error) {
+      console.error('Error updating welfare case:', error);
+      toast.error('Failed to update welfare case');
     }
   };
 
@@ -388,13 +431,22 @@ export default function WelfareCasesPage() {
                       </td>
                       <td className="py-3 px-4 text-right">
                         {welfareCase.status === 'PENDING' && (
-                          <button
-                            onClick={() => handleDeleteCase(welfareCase.id)}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete case"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handleEditCase(welfareCase)}
+                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                              title="Edit case"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCase(welfareCase.id)}
+                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete case"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
                         )}
                       </td>
                     </tr>
@@ -481,6 +533,95 @@ export default function WelfareCasesPage() {
                     className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all"
                   >
                     Submit Case
+                  </button>
+                </div>
+              </form>
+              </div>
+            </div>
+        )}
+
+        {showEditModal && selectedCase && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <h2 className="text-lg font-bold text-foreground">Edit Welfare Case</h2>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedCase(null);
+                  }}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  &times;
+                </button>
+              </div>
+              <form onSubmit={handleUpdateCase} className="p-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Case Type
+                  </label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                  >
+                    <option value="MEDICAL">Medical</option>
+                    <option value="BEREAVEMENT">Bereavement</option>
+                    <option value="EMERGENCY">Emergency</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    placeholder="Brief title of the case"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Description
+                  </label>
+                  <textarea
+                    required
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 min-h-[100px]"
+                    placeholder="Describe the case in detail..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Amount Requested (KES)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.amountRequested}
+                    onChange={(e) => setFormData({ ...formData, amountRequested: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    placeholder="Enter amount"
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setSelectedCase(null);
+                    }}
+                    className="flex-1 px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all"
+                  >
+                    Update Case
                   </button>
                 </div>
               </form>
