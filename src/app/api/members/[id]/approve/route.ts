@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { hashPassword, generateDefaultPassword } from '@/lib/auth';
+import { notifyMemberApproved } from '@/lib/notification-helpers';
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -41,6 +42,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         user: true,
       },
     });
+
+    // Trigger notification and email
+    try {
+      await notifyMemberApproved(updatedMember.id);
+    } catch (notifyError) {
+      console.error('Error triggering approval notification:', notifyError);
+    }
 
     return NextResponse.json({
       member: updatedMember,

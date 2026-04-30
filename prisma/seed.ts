@@ -83,7 +83,7 @@ async function main() {
         stateDepartment: 'State Dept. of Medical Services',
         payrollNumber: 'TEST/001',
         phoneNumber: '0711111111',
-        email: 'john.doe@health.go.ke',
+        email: 'onangoa@gmail.com',
         postalAddress: 'P.O. Box 12345-00100, Nairobi',
         hasAgreedToTerms: true,
         employmentStatus: 'IN_SERVICE',
@@ -97,7 +97,7 @@ async function main() {
 
     await prisma.user.create({
       data: {
-        email: 'john.doe@health.go.ke',
+        email: 'onangoa@gmail.com',
         password: testPassword,
         role: 'MEMBER',
         memberId: testMember.id,
@@ -110,7 +110,7 @@ async function main() {
     console.log('\n========================================');
     console.log('🔑 Test Member Credentials:');
     console.log('========================================');
-    console.log('  Email:    john.doe@health.go.ke');
+    console.log('  Email:    onangoa@gmail.com');
     console.log('  Password: Member123!');
     console.log('========================================\n');
 

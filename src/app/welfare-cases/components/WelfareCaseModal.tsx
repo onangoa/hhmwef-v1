@@ -202,12 +202,18 @@ export default function WelfareCaseModal({
   };
 
   const handleAddDisbursement = async () => {
-    if (!newDisbursement.memberId || !newDisbursement.amount || !newDisbursement.reference) return;
+    if (!newDisbursement.memberId || !newDisbursement.amount || !newDisbursement.reference) {
+      alert('Please fill in all required fields (Disbursed By, Amount, and Reference)');
+      return;
+    }
     try {
       const response = await fetch(`/api/welfare-cases/${welfareCase.id}/disburse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newDisbursement),
+        body: JSON.stringify({
+          ...newDisbursement,
+          amount: Number(newDisbursement.amount)
+        }),
       });
       if (response.ok) {
         const data = await response.json();
@@ -574,16 +580,22 @@ export default function WelfareCaseModal({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                        Disbursed By (Member ID)
+                        Disbursed By
                       </label>
-                      <input
+                      <select
                         className={inputClass}
-                        placeholder="e.g. member-003"
                         value={newDisbursement.memberId}
                         onChange={(e) =>
                           setNewDisbursement({ ...newDisbursement, memberId: e.target.value })
                         }
-                      />
+                      >
+                        <option value="">Select a committee member</option>
+                        {committeeMembers.map((member) => (
+                          <option key={`disb-${member.id}`} value={member.id}>
+                            {member.firstName} {member.lastName} ({member.user?.role})
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="text-xs font-medium text-muted-foreground mb-1 block">
@@ -620,20 +632,16 @@ export default function WelfareCaseModal({
                     </div>
                     <div>
                       <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                        Role
+                        Reference / Receipt No.
                       </label>
-                      <select
+                      <input
                         className={inputClass}
-                        value={newDecision.role}
+                        placeholder="e.g. TR-98234"
+                        value={newDisbursement.reference}
                         onChange={(e) =>
-                          setNewDecision({ ...newDecision, role: e.target.value })
+                          setNewDisbursement({ ...newDisbursement, reference: e.target.value })
                         }
-                      >
-                        <option value="">Select a role</option>
-                        <option value="CHAIRPERSON">Chairperson</option>
-                        <option value="SECRETARY">Secretary</option>
-                        <option value="MEMBER">Member</option>
-                      </select>
+                      />
                     </div>
                   </div>
                   <div className="flex gap-2">

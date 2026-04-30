@@ -31,7 +31,7 @@ const DEMO_CREDENTIALS = {
     password: 'Admin123!',
   },
   member: {
-    email: 'john.doe@health.go.ke',
+    email: 'onangoa@gmail.com',
     password: 'Member123!',
   },
 };

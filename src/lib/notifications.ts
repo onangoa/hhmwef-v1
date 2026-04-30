@@ -1,4 +1,5 @@
 import { prisma } from './db';
+import { sendEmailAsync } from './email';
 
 export type NotificationType =
   | 'INFO'
@@ -30,6 +31,54 @@ export async function createUserNotification(params: CreateNotificationParams) {
         icon: params.icon,
       },
     });
+    // Send email notification asynchronously
+    try {
+      const member = await prisma.member.findUnique({
+        where: { id: params.memberId },
+        select: { 
+          email: true, 
+          firstName: true, 
+          notificationEmailEnabled: true,
+          contributionAlerts: true,
+          welfareAlerts: true,
+          systemAlerts: true
+        }
+      });
+      if (member && member.email && member.notificationEmailEnabled) {
+        // Check if specific notification type is enabled
+        let shouldSendEmail = true;
+        
+        if (params.type === 'CONTRIBUTION' || params.title.includes('Contribution')) {
+          shouldSendEmail = member.contributionAlerts ?? true;
+        } else if (params.type === 'WELFARE' || params.title.includes('Welfare')) {
+          shouldSendEmail = member.welfareAlerts ?? true;
+        } else if (params.type === 'SYSTEM' || params.title.includes('System')) {
+          shouldSendEmail = member.systemAlerts ?? true;
+        }
+        
+        if (!shouldSendEmail) {
+          console.log('Email notification skipped: specific notification type disabled for member');
+          return;
+        }
+        sendEmailAsync({
+          to: member.email,
+          subject: `HHS Welfare: ${params.title}`,
+          html: `
+            <div style="font-family: sans-serif; padding: 20px; color: #333;">
+              <h2 style="color: #1d4ed8;">${params.title}</h2>
+              <p>Hello ${member.firstName},</p>
+              <p>${params.message}</p>
+              ${params.link ? `<p><a href="${process.env.NEXT_PUBLIC_APP_URL || ''}${params.link}" style="display: inline-block; padding: 10px 20px; background-color: #1d4ed8; color: white; text-decoration: none; border-radius: 5px;">View Details</a></p>` : ''}
+              <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+              <p style="font-size: 12px; color: #666;">This is an automated notification from HHS Welfare System.</p>
+            </div>
+          `
+        });
+      }
+    } catch (emailError) {
+      console.error('Error triggered during email preparation:', emailError);
+      // We don't throw here to ensure the notification creation itself is considered successful
+    }
 
     return notification;
   } catch (error) {
