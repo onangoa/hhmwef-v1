@@ -110,7 +110,7 @@ export default function WelfareCaseModal({
   const [showAddDisbursement, setShowAddDisbursement] = useState(false);
   const [committeeMembers, setCommitteeMembers] = useState<any[]>([]);
   const [newDecision, setNewDecision] = useState({
-    memberId: '',
+    memberId: '', // This will now store the Member ID, not User ID
     role: '',
     decision: 'APPROVED' as ApprovalDecision,
     comment: '',
@@ -155,6 +155,8 @@ export default function WelfareCaseModal({
       alert('Please select both a committee member and role');
       return;
     }
+    
+    console.log('Sending decision data:', newDecision);
     
     try {
       const response = await fetch(`/api/welfare-cases/${welfareCase.id}/decisions`, {
@@ -426,7 +428,7 @@ export default function WelfareCaseModal({
                       >
                         <option value="">Select a committee member</option>
                         {committeeMembers.map((member) => (
-                          <option key={member.id} value={member.id}>
+                          <option key={member.id} value={member.memberId}>
                             {member.member ? `${member.member.firstName} ${member.member.lastName} (${member.role})` : `${member.email} (${member.role})`}
                           </option>
                         ))}

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Validate that the member exists
-    const member = await prisma.user.findUnique({
+    const member = await prisma.member.findUnique({
       where: { id: memberId }
     });
 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }, { status: 404 });
     }
 
-    console.log('Member validation passed - found member:', { id: member.id, email: member.email, role: member.role });
+    console.log('Member validation passed - found member:', { id: member.id, name: `${member.firstName} ${member.lastName}` });
 
     const welfareCase = await prisma.welfareCase.findUnique({
       where: { id },

@@ -3,31 +3,37 @@ import { prisma } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    // Fetch users with committee roles (ADMIN, TREASURER, SECRETARY)
-    const committeeMembers = await prisma.user.findMany({
+    // Fetch all active members (not users with committee roles)
+    const activeMembers = await prisma.member.findMany({
       where: {
-        role: {
-          in: ['ADMIN', 'TREASURER', 'SECRETARY']
-        }
+        memberStatus: 'ACTIVE'
       },
       include: {
-        member: {
+        user: {
           select: {
-            firstName: true,
-            lastName: true
+            id: true,
+            email: true,
+            role: true
           }
         }
       },
       orderBy: {
-        role: 'asc'
+        lastName: 'asc'
       }
     });
 
-    return NextResponse.json(committeeMembers);
+    console.log('Active members found:', activeMembers.map(m => ({ 
+      memberId: m.id, 
+      name: `${m.firstName} ${m.lastName}`,
+      email: m.user?.email,
+      role: m.user?.role 
+    })));
+
+    return NextResponse.json(activeMembers);
   } catch (error) {
-    console.error('Error fetching committee members:', error);
+    console.error('Error fetching active members:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch committee members' },
+      { error: 'Failed to fetch active members' },
       { status: 500 }
     );
   }
