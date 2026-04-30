@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, XCircle, Clock, Banknote, Users, FileText, Plus } from 'lucide-react';
 import {
   WelfareCase,
@@ -105,9 +105,10 @@ export default function WelfareCaseModal({
   onClose,
   onUpdate,
 }: WelfareCaseModalProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('Overview');
+  const [activeTab, setActiveTab] = useState<TABS[0]>('Overview');
   const [showAddDecision, setShowAddDecision] = useState(false);
   const [showAddDisbursement, setShowAddDisbursement] = useState(false);
+  const [committeeMembers, setCommitteeMembers] = useState<any[]>([]);
   const [newDecision, setNewDecision] = useState({
     memberId: '',
     role: '',
@@ -121,6 +122,25 @@ export default function WelfareCaseModal({
     reference: '',
   });
 
+  // Fetch committee members
+  useEffect(() => {
+    const fetchCommitteeMembers = async () => {
+      try {
+        const response = await fetch('/api/users/committee-members');
+        if (response.ok) {
+          const members = await response.json();
+          setCommitteeMembers(members);
+        }
+      } catch (error) {
+        console.error('Error fetching committee members:', error);
+      }
+    };
+
+    if (isOpen) {
+      fetchCommitteeMembers();
+    }
+  }, [isOpen]);
+
   if (!isOpen || !welfareCase) return null;
 
   const typeConfig = CASE_TYPE_CONFIG[welfareCase.type];
@@ -131,13 +151,18 @@ export default function WelfareCaseModal({
   const totalDisbursed = welfareCase.disbursements.reduce((s, d) => s + d.amount, 0);
 
   const handleAddDecision = async () => {
-    if (!newDecision.memberId || !newDecision.role) return;
+    if (!newDecision.memberId || !newDecision.role) {
+      alert('Please select both a committee member and role');
+      return;
+    }
+    
     try {
       const response = await fetch(`/api/welfare-cases/${welfareCase.id}/decisions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newDecision),
       });
+      
       if (response.ok) {
         const data = await response.json();
         const decision: CommitteeDecision = {
@@ -390,16 +415,22 @@ export default function WelfareCaseModal({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                        Committee Member ID
+                        Committee Member
                       </label>
-                      <input
+                      <select
                         className={inputClass}
-                        placeholder="e.g. member-001"
                         value={newDecision.memberId}
                         onChange={(e) =>
                           setNewDecision({ ...newDecision, memberId: e.target.value })
                         }
-                      />
+                      >
+                        <option value="">Select a committee member</option>
+                        {committeeMembers.map((member) => (
+                          <option key={member.id} value={member.id}>
+                            {member.member ? `${member.member.firstName} ${member.member.lastName} (${member.role})` : `${member.email} (${member.role})`}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="text-xs font-medium text-muted-foreground mb-1 block">
@@ -587,16 +618,20 @@ export default function WelfareCaseModal({
                     </div>
                     <div>
                       <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                        Transaction Reference
+                        Role
                       </label>
-                      <input
+                      <select
                         className={inputClass}
-                        placeholder="e.g. TXN/2026/001"
-                        value={newDisbursement.reference}
+                        value={newDecision.role}
                         onChange={(e) =>
-                          setNewDisbursement({ ...newDisbursement, reference: e.target.value })
+                          setNewDecision({ ...newDecision, role: e.target.value })
                         }
-                      />
+                      >
+                        <option value="">Select a role</option>
+                        <option value="CHAIRPERSON">Chairperson</option>
+                        <option value="SECRETARY">Secretary</option>
+                        <option value="MEMBER">Member</option>
+                      </select>
                     </div>
                   </div>
                   <div className="flex gap-2">

@@ -21,10 +21,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     });
 
     if (!member) {
+      console.log('Member validation failed - memberId received:', memberId);
+      console.log('Member validation failed - memberId type:', typeof memberId);
       return NextResponse.json({ 
-        error: `Member with ID ${memberId} not found` 
+        error: `Member with ID '${memberId}' not found in database` 
       }, { status: 404 });
     }
+
+    console.log('Member validation passed - found member:', { id: member.id, email: member.email, role: member.role });
 
     const welfareCase = await prisma.welfareCase.findUnique({
       where: { id },
