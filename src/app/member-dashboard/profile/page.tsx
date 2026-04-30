@@ -360,6 +360,9 @@ export default function ProfilePage() {
   const fetchDocuments = async () => {
     try {
       if (user?.member?.id) {
+        // Set a cookie with the user ID
+        document.cookie = `user-id=${user.id}; path=/`;
+        
         const response = await fetch(`/api/members/${user.member.id}/documents`);
         if (response.ok) {
           const data = await response.json();
@@ -383,10 +386,19 @@ export default function ProfilePage() {
         formData.append('description', description);
       }
 
+      console.log('Upload Debug - User ID:', user.id);
+      console.log('Upload Debug - Member ID:', user.member.id);
+
+      // Set a cookie with the user ID as a fallback
+      document.cookie = `user-id=${user.id}; path=/`;
+
       const response = await fetch(`/api/members/${user.member.id}/documents`, {
         method: 'POST',
+        // Don't set headers when using FormData, use cookies instead
         body: formData,
       });
+
+      console.log('Upload Debug - Response status:', response.status);
 
       if (response.ok) {
         const newDocument = await response.json();
@@ -394,6 +406,7 @@ export default function ProfilePage() {
         toast.success('Document uploaded successfully');
       } else {
         const error = await response.json();
+        console.error('Upload Debug - Error response:', error);
         toast.error(error.error || 'Failed to upload document');
       }
     } catch (error) {
@@ -414,6 +427,32 @@ export default function ProfilePage() {
         const description = prompt('Enter description (optional):');
         handleFileUpload(file, documentType.toUpperCase(), description || undefined);
       }
+    }
+  };
+
+  const handleDeleteDocument = async (documentId: string) => {
+    if (!confirm('Are you sure you want to delete this document?')) {
+      return;
+    }
+
+    try {
+      // Set a cookie with the user ID
+      document.cookie = `user-id=${user.id}; path=/`;
+      
+      const response = await fetch(`/api/members/${user.member.id}/documents/${documentId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setDocuments(documents.filter(doc => doc.id !== documentId));
+        toast.success('Document deleted successfully');
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to delete document');
+      }
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast.error('Failed to delete document');
     }
   };
 

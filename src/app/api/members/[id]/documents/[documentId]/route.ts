@@ -2,19 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { unlink } from 'fs/promises';
 import path from 'path';
+import { requireAuth } from '@/lib/auth-server';
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string; documentId: string } }
 ) {
   try {
-    // For custom auth, we'll check if the user ID in the params matches the authenticated user
-    const authHeader = request.headers.get('authorization');
-    const userToken = request.cookies.get('user-token')?.value;
-
-    // Simple authentication check
-    if (!authHeader && !userToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Authenticate the user
+    const user = await requireAuth(request);
+    
+    // Check if the user is trying to delete their own documents
+    if (user.memberId !== params.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // Find the document
@@ -49,6 +49,9 @@ export async function DELETE(
 
   } catch (error) {
     console.error('Error deleting document:', error);
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     return NextResponse.json(
       { error: 'Failed to delete document' },
       { status: 500 }

@@ -3,25 +3,20 @@ import { writeFile } from 'fs/promises';
 import path from 'path';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/db';
-import { getUser } from '@/lib/auth-client';
+import { requireAuth } from '@/lib/auth-server';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // For custom auth, we'll check if the user ID in the params matches the authenticated user
-    // In a real implementation, you might want to add proper JWT verification here
-    const authHeader = request.headers.get('authorization');
-    const userToken = request.cookies.get('user-token')?.value;
-
-    // Simple authentication check - in production, you should use proper JWT verification
-    if (!authHeader && !userToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Authenticate the user
+    const user = await requireAuth(request);
+    
+    // Check if the user is trying to upload their own documents
+    if (user.memberId !== params.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
-
-    // For now, we'll allow the request to proceed if there's any auth header or token
-    // In a production app, you should verify the token and extract the user ID
 
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;
@@ -123,13 +118,12 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // For custom auth, we'll check if the user ID in the params matches the authenticated user
-    const authHeader = request.headers.get('authorization');
-    const userToken = request.cookies.get('user-token')?.value;
-
-    // Simple authentication check
-    if (!authHeader && !userToken) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Authenticate the user
+    const user = await requireAuth(request);
+    
+    // Check if the user is trying to access their own documents
+    if (user.memberId !== params.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // Fetch documents from database
@@ -146,6 +140,9 @@ export async function GET(
 
   } catch (error) {
     console.error('Error fetching documents:', error);
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     return NextResponse.json(
       { error: 'Failed to fetch documents' },
       { status: 500 }
