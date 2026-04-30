@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
         hasAgreedToTerms: body.agreedToTerms || false,
         employmentStatus: body.employmentStatus || 'IN_SERVICE',
         memberStatus: 'INACTIVE',
+        mpesaConfirmation: body.mpesaConfirmation || null,
         nextOfKins: body.nextOfKins
           ? {
               create: body.nextOfKins.map((kin: any) => ({

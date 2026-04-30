@@ -25,12 +25,16 @@ export function setUser(user: User): void {
   if (typeof window === 'undefined') return;
 
   localStorage.setItem('user', JSON.stringify(user));
+  // Set a session cookie for middleware
+  document.cookie = `session=${user.id}; path=/; max-age=86400; SameSite=Lax`;
 }
 
 export function removeUser(): void {
   if (typeof window === 'undefined') return;
 
   localStorage.removeItem('user');
+  // Remove the session cookie
+  document.cookie = 'session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 }
 
 export function isAuthenticated(): boolean {

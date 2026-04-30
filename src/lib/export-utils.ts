@@ -1,8 +1,8 @@
-import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export const exportToExcel = (data: any[], fileName: string) => {
+  const XLSX = require('xlsx');
   const worksheet = XLSX.utils.json_to_sheet(data);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
@@ -19,7 +19,7 @@ export const exportToPDF = (headers: string[], data: any[][], fileName: string, 
   doc.setTextColor(100);
   doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 30);
   
-  (doc as any).autoTable({
+  autoTable(doc, {
     head: [headers],
     body: data,
     startY: 35,
