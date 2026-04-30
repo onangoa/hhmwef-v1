@@ -88,7 +88,7 @@ export default function AllMembersPage() {
   const fetchMembers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/members');
+      const response = await fetch('/api/members?status=ACTIVE');
       if (response.ok) {
         const data = await response.json();
         const mappedMembers = (data.members || []).map((m: any, i: number) =>

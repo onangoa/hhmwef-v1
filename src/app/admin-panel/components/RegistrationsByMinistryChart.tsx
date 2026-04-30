@@ -54,7 +54,8 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   );
 }
 
-export default function RegistrationsByMinistryChart() {
+export default function RegistrationsByMinistryChart({ stats }: { stats: any }) {
+  const chartData = stats?.ministryData || MINISTRY_DATA;
   return (
     <div className="bg-white rounded-xl border border-border shadow-card p-5">
       <div className="flex items-center gap-2 mb-5">
@@ -71,7 +72,7 @@ export default function RegistrationsByMinistryChart() {
 
       <ResponsiveContainer width="100%" height={220}>
         <BarChart
-          data={MINISTRY_DATA}
+          data={chartData}
           margin={{ top: 5, right: 10, left: -20, bottom: 20 }}
           barSize={20}
         >
@@ -88,7 +89,7 @@ export default function RegistrationsByMinistryChart() {
           <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(59,130,246,0.05)' }} />
           <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-            {MINISTRY_DATA.map((entry, index) => (
+            {chartData.map((entry: any, index: number) => (
               <Cell key={`bar-cell-${entry.name}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
             ))}
           </Bar>

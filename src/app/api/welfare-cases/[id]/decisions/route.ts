@@ -73,26 +73,24 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       where: { caseId: id },
     });
 
-    if (allDecisions.length >= 3) {
-      const approvedCount = allDecisions.filter((d) => d.decision === 'APPROVED').length;
-      const rejectedCount = allDecisions.filter((d) => d.decision === 'REJECTED').length;
+    const approvedCount = allDecisions.filter((d) => d.decision === 'APPROVED').length;
+    const rejectedCount = allDecisions.filter((d) => d.decision === 'REJECTED').length;
 
-      let newStatus = welfareCase.status;
+    let newStatus = welfareCase.status;
 
-      if (approvedCount >= 3) {
-        newStatus = 'APPROVED';
-      } else if (rejectedCount >= 2) {
-        newStatus = 'REJECTED';
-      } else if (approvedCount >= 2 && rejectedCount === 0) {
-        newStatus = 'UNDER_REVIEW';
-      }
+    if (approvedCount >= 3) {
+      newStatus = 'APPROVED';
+    } else if (rejectedCount >= 2) {
+      newStatus = 'REJECTED';
+    } else if (approvedCount >= 1 && welfareCase.status === 'PENDING') {
+      newStatus = 'UNDER_REVIEW';
+    }
 
-      if (newStatus !== welfareCase.status) {
-        await prisma.welfareCase.update({
-          where: { id },
-          data: { status: newStatus },
-        });
-      }
+    if (newStatus !== welfareCase.status) {
+      await prisma.welfareCase.update({
+        where: { id },
+        data: { status: newStatus },
+      });
     }
 
     return NextResponse.json({

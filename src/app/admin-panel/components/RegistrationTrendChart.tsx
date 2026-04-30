@@ -47,7 +47,8 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   );
 }
 
-export default function RegistrationTrendChart() {
+export default function RegistrationTrendChart({ stats }: { stats: any }) {
+  const chartData = stats?.weeklyData || WEEKLY_DATA;
   return (
     <div className="bg-white rounded-xl border border-border shadow-card p-5">
       <div className="flex items-center justify-between mb-5">
@@ -75,7 +76,7 @@ export default function RegistrationTrendChart() {
       </div>
 
       <ResponsiveContainer width="100%" height={220}>
-        <AreaChart data={WEEKLY_DATA} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+        <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="gradRegistrations" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />

@@ -16,9 +16,9 @@ interface CustomTooltipProps {
   payload?: Array<{ name: string; value: number; payload: { color: string } }>;
 }
 
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
+function CustomTooltip({ active, payload, data }: { active?: boolean; payload?: any; data: any[] }) {
   if (!active || !payload?.length) return null;
-  const total = STATUS_DATA.reduce((acc, d) => acc + d.value, 0);
+  const total = data.reduce((acc, d) => acc + d.value, 0);
   return (
     <div className="bg-white border border-border rounded-xl shadow-modal p-3 text-sm">
       <div className="flex items-center gap-2 mb-1">
@@ -32,13 +32,14 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
         {payload[0].value.toLocaleString()} members
       </p>
       <p className="text-muted-foreground text-xs">
-        {((payload[0].value / total) * 100).toFixed(1)}% of total
+        {total > 0 ? ((payload[0].value / total) * 100).toFixed(1) : 0}% of total
       </p>
     </div>
   );
 }
 
-export default function MemberStatusPieChart() {
+export default function MemberStatusPieChart({ stats }: { stats: any }) {
+  const chartData = stats?.statusData || STATUS_DATA;
   return (
     <div className="bg-white rounded-xl border border-border shadow-card p-5">
       <div className="flex items-center gap-2 mb-4">
@@ -54,7 +55,7 @@ export default function MemberStatusPieChart() {
       <ResponsiveContainer width="100%" height={220}>
         <PieChart>
           <Pie
-            data={STATUS_DATA}
+            data={chartData}
             cx="50%"
             cy="45%"
             innerRadius={55}
@@ -62,11 +63,11 @@ export default function MemberStatusPieChart() {
             paddingAngle={3}
             dataKey="value"
           >
-            {STATUS_DATA.map((entry) => (
+            {chartData.map((entry: any) => (
               <Cell key={`pie-cell-${entry.name}`} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip data={chartData} />} />
           <Legend
             iconType="circle"
             iconSize={8}
