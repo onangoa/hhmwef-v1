@@ -120,6 +120,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
                   lastName: pg.lastName,
                   surname: pg.surname || null,
                   relationship: pg.relationship,
+                  phoneNumber: pg.phoneNumber || null,
                 })),
               }
             : undefined,
@@ -132,6 +133,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
                   lastName: pil.lastName,
                   surname: pil.surname || null,
                   relationship: pil.relationship,
+                  phoneNumber: pil.phoneNumber || null,
                 })),
               }
             : undefined,

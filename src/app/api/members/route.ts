@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
                   lastName: pg.lastName,
                   surname: pg.surname || null,
                   relationship: pg.relationship,
+                  phoneNumber: pg.phoneNumber || null,
                 })),
               }
             : undefined,
@@ -144,6 +145,7 @@ export async function POST(request: NextRequest) {
                   lastName: pil.lastName,
                   surname: pil.surname || null,
                   relationship: pil.relationship,
+                  phoneNumber: pil.phoneNumber || null,
                 })),
               }
             : undefined,

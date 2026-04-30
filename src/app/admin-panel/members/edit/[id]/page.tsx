@@ -431,7 +431,7 @@ export default function EditMemberPage() {
                 </h3>
                 <div className="space-y-4">
                   {(formData.parentGuardians || []).map((pg: any, index: number) => (
-                    <div key={index} className="p-4 border border-border rounded-xl grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div key={index} className="p-4 border border-border rounded-xl grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className={labelClass}>Name</label>
                         <input 
@@ -452,10 +452,18 @@ export default function EditMemberPage() {
                           className={inputClass} 
                         />
                       </div>
+                      <div>
+                        <label className={labelClass}>Phone Number</label>
+                        <input 
+                          type="text" value={pg.phoneNumber || ''} 
+                          onChange={(e) => handleArrayChange('parentGuardians', index, 'phoneNumber', e.target.value)} 
+                          className={inputClass} 
+                        />
+                      </div>
                     </div>
                   ))}
                   <button 
-                    onClick={() => addArrayItem('parentGuardians', { firstName: '', lastName: '', relationship: '' })}
+                    onClick={() => addArrayItem('parentGuardians', { firstName: '', lastName: '', relationship: '', phoneNumber: '' })}
                     className="w-full py-2.5 border-2 border-dashed border-border rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted transition-all"
                   >
                     + Add Parent/Guardian
@@ -470,7 +478,7 @@ export default function EditMemberPage() {
                 </h3>
                 <div className="space-y-4">
                   {(formData.parentsInLaws || []).map((pil: any, index: number) => (
-                    <div key={index} className="p-4 border border-border rounded-xl grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div key={index} className="p-4 border border-border rounded-xl grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className={labelClass}>Name</label>
                         <input 
@@ -491,10 +499,18 @@ export default function EditMemberPage() {
                           className={inputClass} 
                         />
                       </div>
+                      <div>
+                        <label className={labelClass}>Phone Number</label>
+                        <input 
+                          type="text" value={pil.phoneNumber || ''} 
+                          onChange={(e) => handleArrayChange('parentsInLaws', index, 'phoneNumber', e.target.value)} 
+                          className={inputClass} 
+                        />
+                      </div>
                     </div>
                   ))}
                   <button 
-                    onClick={() => addArrayItem('parentsInLaws', { firstName: '', lastName: '', relationship: '' })}
+                    onClick={() => addArrayItem('parentsInLaws', { firstName: '', lastName: '', relationship: '', phoneNumber: '' })}
                     className="w-full py-2.5 border-2 border-dashed border-border rounded-xl text-xs font-semibold text-muted-foreground hover:bg-muted transition-all"
                   >
                     + Add Parent-in-Law
