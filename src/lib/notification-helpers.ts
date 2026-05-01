@@ -5,6 +5,7 @@
 
 import { createUserNotification, NotificationTemplates } from '@/lib/notifications';
 import { sendEmailAsync } from '@/lib/email';
+import { sendSms } from '@/lib/sms';
 
 // Example: Creating a notification when a member makes a contribution
 export async function notifyContributionReceived(memberId: string) {
@@ -19,6 +20,11 @@ export async function notifyContributionReceived(memberId: string) {
 
 // Example: Creating a notification when a contribution is verified
 export async function notifyContributionVerified(memberId: string) {
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: { phoneNumber: true }
+  });
+
   await createUserNotification({
     memberId,
     type: 'SUCCESS',
@@ -26,10 +32,26 @@ export async function notifyContributionVerified(memberId: string) {
     message: 'Your contribution has been verified successfully.',
     icon: '✅',
   });
+
+  if (member && member.phoneNumber) {
+    const formattedPhone = member.phoneNumber.startsWith('0')
+      ? '254' + member.phoneNumber.slice(1)
+      : member.phoneNumber;
+
+    sendSms({
+      message: 'HHS Welfare: Your contribution has been verified successfully.',
+      recipients: [formattedPhone],
+    });
+  }
 }
 
 // Example: Creating a notification for welfare case approval
 export async function notifyWelfareCaseApproved(memberId: string) {
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: { phoneNumber: true }
+  });
+
   await createUserNotification({
     memberId,
     type: 'WELFARE',
@@ -38,13 +60,24 @@ export async function notifyWelfareCaseApproved(memberId: string) {
     icon: '❤️',
     link: '/member-dashboard/welfare',
   });
+
+  if (member && member.phoneNumber) {
+    const formattedPhone = member.phoneNumber.startsWith('0')
+      ? '254' + member.phoneNumber.slice(1)
+      : member.phoneNumber;
+
+    sendSms({
+      message: 'HHS Welfare: Your welfare case has been approved and will be processed.',
+      recipients: [formattedPhone],
+    });
+  }
 }
 
 // Example: Creating a notification when member is approved
 export async function notifyMemberApproved(memberId: string, password?: string) {
   const member = await prisma.member.findUnique({
     where: { id: memberId },
-    select: { email: true, firstName: true }
+    select: { email: true, firstName: true, phoneNumber: true }
   });
 
   await createUserNotification({
@@ -75,10 +108,30 @@ export async function notifyMemberApproved(memberId: string, password?: string) 
       `
     });
   }
+
+  if (member && member.phoneNumber) {
+    const formattedPhone = member.phoneNumber.startsWith('0') 
+      ? '254' + member.phoneNumber.slice(1) 
+      : member.phoneNumber;
+
+    const smsMessage = password
+      ? `HHS Welfare: Your membership has been approved. Login: Email: ${member.email}, Password: ${password}. Please change your password after login.`
+      : `HHS Welfare: Your membership has been approved. Welcome to the HHS Welfare!`;
+
+    sendSms({
+      message: smsMessage,
+      recipients: [formattedPhone],
+    });
+  }
 }
 
 // Example: Creating a notification when member is rejected
 export async function notifyMemberRejected(memberId: string, reason?: string) {
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: { phoneNumber: true }
+  });
+
   await createUserNotification({
     memberId,
     type: 'WARNING',
@@ -86,16 +139,32 @@ export async function notifyMemberRejected(memberId: string, reason?: string) {
     message: reason || 'Your membership application has been rejected. Please contact the SACCO office for more information.',
     icon: '❌',
   });
+
+  if (member && member.phoneNumber) {
+    const formattedPhone = member.phoneNumber.startsWith('0')
+      ? '254' + member.phoneNumber.slice(1)
+      : member.phoneNumber;
+
+    sendSms({
+      message: `HHS Welfare: Your membership application has been rejected. ${reason || 'Please contact the office for more information.'}`,
+      recipients: [formattedPhone],
+    });
+  }
 }
 
 // Payment reminder notifications
 export async function notifyUpcomingPayment(memberId: string, dueDate: Date) {
-  const formattedDate = dueDate.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const formattedDate = dueDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
-  
+
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: { phoneNumber: true }
+  });
+
   await createUserNotification({
     memberId,
     type: 'WARNING',
@@ -104,15 +173,31 @@ export async function notifyUpcomingPayment(memberId: string, dueDate: Date) {
     icon: '💰',
     link: '/member-dashboard/contributions',
   });
+
+  if (member && member.phoneNumber) {
+    const formattedPhone = member.phoneNumber.startsWith('0')
+      ? '254' + member.phoneNumber.slice(1)
+      : member.phoneNumber;
+
+    sendSms({
+      message: `HHS Welfare: Your monthly contribution is due on ${formattedDate}. Please pay on time.`,
+      recipients: [formattedPhone],
+    });
+  }
 }
 
 export async function notifyOverduePayment(memberId: string, dueDate: Date) {
-  const formattedDate = dueDate.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const formattedDate = dueDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
-  
+
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: { phoneNumber: true }
+  });
+
   await createUserNotification({
     memberId,
     type: 'ERROR',
@@ -121,15 +206,31 @@ export async function notifyOverduePayment(memberId: string, dueDate: Date) {
     icon: '⚠️',
     link: '/member-dashboard/contributions',
   });
+
+  if (member && member.phoneNumber) {
+    const formattedPhone = member.phoneNumber.startsWith('0')
+      ? '254' + member.phoneNumber.slice(1)
+      : member.phoneNumber;
+
+    sendSms({
+      message: `HHS Welfare: Your payment for ${formattedDate} is overdue. Please pay immediately.`,
+      recipients: [formattedPhone],
+    });
+  }
 }
 
 export async function notifyDefaultStatus(memberId: string, dueDate: Date) {
-  const formattedDate = dueDate.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const formattedDate = dueDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
-  
+
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: { phoneNumber: true }
+  });
+
   await createUserNotification({
     memberId,
     type: 'ERROR',
@@ -138,6 +239,17 @@ export async function notifyDefaultStatus(memberId: string, dueDate: Date) {
     icon: '❌',
     link: '/member-dashboard/contributions',
   });
+
+  if (member && member.phoneNumber) {
+    const formattedPhone = member.phoneNumber.startsWith('0')
+      ? '254' + member.phoneNumber.slice(1)
+      : member.phoneNumber;
+
+    sendSms({
+      message: `HHS Welfare: You are marked as default for payment due ${formattedDate}. Contact the office immediately.`,
+      recipients: [formattedPhone],
+    });
+  }
 }
 
 // Example: Creating a system announcement for all members

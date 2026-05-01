@@ -49,6 +49,11 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         approvalDate: body.memberStatus === 'ACTIVE' ? new Date() : undefined,
         approvedBy: body.memberStatus === 'ACTIVE' ? 'ADMIN' : undefined,
         groupRole: body.groupRole,
+        notificationEmailEnabled: body.notificationEmailEnabled,
+        notificationSmsEnabled: body.notificationSmsEnabled,
+        contributionAlerts: body.contributionAlerts,
+        welfareAlerts: body.welfareAlerts,
+        systemAlerts: body.systemAlerts,
         spouse:
           body.spouse &&
           (body.spouse.firstName ||
