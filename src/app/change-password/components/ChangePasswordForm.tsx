@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   CheckCircle,
 } from 'lucide-react';
+import { useUser } from '@/lib/user-context';
 
 interface ChangePasswordFormData {
   currentPassword: string;
@@ -21,6 +22,7 @@ interface ChangePasswordFormData {
 
 export default function ChangePasswordForm() {
   const router = useRouter();
+  const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -46,14 +48,27 @@ export default function ChangePasswordForm() {
   }, []);
 
   const onSubmit = async (data: ChangePasswordFormData) => {
+    if (!user) {
+      toast.error('Authentication error', {
+        description: 'Please log in again',
+      });
+      router.push('/login-screen');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/change-password', {
+      const apiUrl = isFirstLogin
+        ? '/api/auth/change-password?first=true'
+        : '/api/auth/change-password';
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          userId: user.id,
           currentPassword: data.currentPassword,
           newPassword: data.password,
         }),

@@ -119,6 +119,7 @@ model Member {
   employmentStatus          EmploymentStatus  @default(IN_SERVICE)
   memberStatus              MemberStatus      @default(INACTIVE)
   hasAgreedToTerms          Boolean           @default(false)
+  mpesaConfirmation         String?
   registrationDate          DateTime          @default(now())
   approvalDate              DateTime?
   approvedBy                String?
