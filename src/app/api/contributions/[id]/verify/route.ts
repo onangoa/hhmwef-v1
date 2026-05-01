@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { createUserNotification } from '@/lib/notifications';
+import { notifyContributionVerified } from '@/lib/notification-helpers';
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -22,14 +22,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     });
 
     // Create notification for the member
-    await createUserNotification({
-      memberId: contribution.memberId,
-      type: 'SUCCESS',
-      title: 'Contribution Verified',
-      message: `Your contribution of KES ${contribution.amount} has been verified successfully.`,
-      icon: '✅',
-      link: '/member-dashboard/contributions',
-    });
+    await notifyContributionVerified(contribution.memberId);
 
     return NextResponse.json({
       contribution,

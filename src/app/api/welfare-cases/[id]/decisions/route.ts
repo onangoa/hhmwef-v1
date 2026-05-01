@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { notifyWelfareCaseApproved } from '@/lib/notification-helpers';
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -91,6 +92,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         where: { id },
         data: { status: newStatus },
       });
+
+      if (newStatus === 'APPROVED') {
+        await notifyWelfareCaseApproved(welfareCase.memberId);
+      }
     }
 
     return NextResponse.json({
