@@ -8,13 +8,12 @@ import { toast } from 'sonner';
 interface User {
   id: string;
   email: string;
-  role: 'ADMIN' | 'MEMBER';
+  role: 'ADMIN' | 'TREASURER' | 'SECRETARY' | 'MEMBER';
   member?: {
-    id: string;
     firstName: string;
     lastName: string;
-    email: string;
-    memberStatus: string;
+    payrollNumber: string;
+    ministry: string;
   };
 }
 
@@ -27,7 +26,7 @@ export default function AdminUsersPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [newAdminData, setNewAdminData] = useState({ email: '', role: 'ADMIN' });
+  const [newAdminData, setNewAdminData] = useState({ email: '', password: '', role: 'ADMIN' });
   const [assignMemberData, setAssignMemberData] = useState({ memberId: '' });
 
   const fetchUsers = async () => {
@@ -36,7 +35,7 @@ export default function AdminUsersPage() {
       const response = await fetch('/api/users');
       if (response.ok) {
         const data = await response.json();
-        setUsers(data.users || []);
+        setUsers(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -62,7 +61,7 @@ export default function AdminUsersPage() {
       if (response.ok) {
         toast.success('Admin user added successfully');
         setShowAddModal(false);
-        setNewAdminData({ email: '', role: 'ADMIN' });
+        setNewAdminData({ email: '', password: '', role: 'ADMIN' });
         fetchUsers();
       } else {
         const error = await response.json();
@@ -145,7 +144,8 @@ export default function AdminUsersPage() {
 
   const filteredUsers = users.filter((u) => {
     const term = searchTerm.toLowerCase();
-    return u.email.toLowerCase().includes(term) || u.member?.email.toLowerCase().includes(term);
+    const memberName = u.member ? `${u.member.firstName} ${u.member.lastName}`.toLowerCase() : '';
+    return u.email.toLowerCase().includes(term) || memberName.includes(term);
   });
 
   if (!user || user.role !== 'ADMIN') {
@@ -166,11 +166,19 @@ export default function AdminUsersPage() {
   return (
     <AdminLayout>
       <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Manage Admin Users</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-                Add, edit admin users, and assign admin roles to members
-          </p>
+        <div className="mb-6 flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Manage Admin Users</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+                  Add, edit admin users, and assign admin roles to members
+            </p>
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+          >
+            Add Admin User
+          </button>
         </div>
         <div className="bg-white rounded-lg shadow border border-border">
           <div className="p-4 border-b border-border">
@@ -179,48 +187,44 @@ export default function AdminUsersPage() {
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+              className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
           </div>
           {loading ? (
             <div className="p-12 text-center">
               <p className="text-sm text-muted-foreground">Loading users...</p>
             </div>
-          ) : filteredUsers.length === 0 ? (
+          ) : users.length === 0 ? (
             <div className="p-12 text-center">
               <p className="text-sm text-muted-foreground">No users found</p>
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {filteredUsers.map((u) => (
-                <div key={u.id} className="flex items-center justify-between p-4 hover:bg-gray-50">
-                  <div className="flex-1">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{u.email}</p>
-                      <p className="text-xs text-muted-foreground">Role: {u.role}</p>
-                      {u.member && (
-                        <p className="text-xs text-blue-600">
-                          Linked to: {u.member.firstName} {u.member.lastName}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedUser(u);
-                          setShowEditModal(true);
-                        }}
-                        className="text-blue-600 hover:text-blue-700"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(u.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        Delete
-                      </button>
-                    </div>
+              {filteredUsers.map((user) => (
+                <div key={user.id} className="flex items-center justify-between p-4 hover:bg-gray-50">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{user.email}</p>
+                    {user.member && (
+                      <p className="text-xs text-muted-foreground">{user.member.firstName} {user.member.lastName}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">Role: {user.role}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setShowEditModal(true);
+                      }}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteUser(user.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}
@@ -228,191 +232,112 @@ export default function AdminUsersPage() {
           )}
         </div>
 
-        {/* Add Admin User Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <h2 className="text-lg font-bold text-foreground">Add Admin User</h2>
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  ✕
-                </button>
+              <div className="p-6">
+                <h2 className="text-lg font-semibold mb-4">Add Admin User</h2>
+                <form onSubmit={handleAddAdmin}>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <input
+                      type="email"
+                      required
+                      value={newAdminData.email}
+                      onChange={(e) => setNewAdminData({ ...newAdminData, email: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-1">Password</label>
+                    <input
+                      type="password"
+                      required
+                      value={newAdminData.password}
+                      onChange={(e) => setNewAdminData({ ...newAdminData, password: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-1">Role</label>
+                    <select
+                      value={newAdminData.role}
+                      onChange={(e) => setNewAdminData({ ...newAdminData, role: e.target.value as 'ADMIN' | 'TREASURER' | 'SECRETARY' | 'MEMBER' })}
+                      className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    >
+                      <option value="ADMIN">ADMIN</option>
+                      <option value="TREASURER">TREASURER</option>
+                      <option value="SECRETARY">SECRETARY</option>
+                      <option value="MEMBER">MEMBER</option>
+                    </select>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddModal(false)}
+                      className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+                    >
+                      Add User
+                    </button>
+                  </div>
+                </form>
               </div>
-              <form onSubmit={handleAddAdmin} className="p-4 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={newAdminData.email}
-                    onChange={(e) => setNewAdminData({ ...newAdminData, email: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-                    placeholder="admin@hhswelfare.co.ke"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Role
-                  </label>
-                  <select
-                    required
-                    value={newAdminData.role}
-                    onChange={(e) => setNewAdminData({ ...newAdminData, role: e.target.value as 'ADMIN' | 'MEMBER' })}
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-                  >
-                    <option value="ADMIN">Admin</option>
-                    <option value="MEMBER">Member</option>
-                  </select>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddModal(false)}
-                    className="flex-1 px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
-                  >
-                    Add User
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
         )}
 
-        {/* Edit User Modal */}
         {showEditModal && selectedUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <h2 className="text-lg font-bold text-foreground">Edit User</h2>
-                <button
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setSelectedUser(null);
-                  }}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  ✕
-                </button>
+              <div className="p-6">
+                <h2 className="text-lg font-semibold mb-4">Edit User</h2>
+                <form onSubmit={(e) => { e.preventDefault(); handleEditUser(selectedUser.id, { email: selectedUser.email, role: selectedUser.role }); }}>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <input
+                      type="email"
+                      required
+                      value={selectedUser.email}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-1">Role</label>
+                    <select
+                      value={selectedUser.role}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, role: e.target.value as 'ADMIN' | 'TREASURER' | 'SECRETARY' | 'MEMBER' })}
+                      className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    >
+                      <option value="ADMIN">ADMIN</option>
+                      <option value="TREASURER">TREASURER</option>
+                      <option value="SECRETARY">SECRETARY</option>
+                      <option value="MEMBER">MEMBER</option>
+                    </select>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowEditModal(false)}
+                      className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+                    >
+                      Update User
+                    </button>
+                  </div>
+                </form>
               </div>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleEditUser(selectedUser.id, {
-                  email: newAdminData.email,
-                  role: newAdminData.role,
-                });
-              }} className="p-4 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    defaultValue={selectedUser.email}
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Role
-                  </label>
-                  <select
-                    required
-                    defaultValue={selectedUser.role}
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-                  >
-                    <option value="ADMIN">Admin</option>
-                    <option value="MEMBER">Member</option>
-                  </select>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowEditModal(false);
-                      setSelectedUser(null);
-                    }}
-                    className="flex-1 px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
-                  >
-                    Update User
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Assign Admin Role Modal */}
-        {showAssignModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <h2 className="text-lg font-bold text-foreground">Assign Admin Role</h2>
-                <button
-                  onClick={() => setShowAssignModal(false)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  ✕
-                </button>
-              </div>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleAssignAdminRole();
-              }} className="p-4 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Member ID
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={assignMemberData.memberId}
-                    onChange={(e) => setAssignMemberData({ ...assignMemberData, memberId: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-                    placeholder="Enter member ID to assign as admin"
-                  />
-                </div>
-                <div className="bg-blue-50 border-blue-200 rounded-lg p-3 mb-4">
-                  <p className="text-xs text-blue-900">
-                    ℹ️ This will approve the member and set them as an admin.
-                  </p>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAssignModal(false);
-                      setAssignMemberData({ memberId: '' });
-                    }}
-                    className="flex-1 px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
-                  >
-                    Assign Admin Role
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
         )}

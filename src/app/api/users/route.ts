@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { hashPassword, isPasswordStrong } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,6 +11,10 @@ export async function GET(request: NextRequest) {
 
     if (role) {
       where.role = role;
+    } else {
+      where.role = {
+        in: ['ADMIN', 'TREASURER', 'SECRETARY'],
+      };
     }
 
     const users = await prisma.user.findMany({
@@ -37,10 +42,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, role } = body;
+    const { email, password, role } = body;
 
-    if (!email || !role) {
-      return NextResponse.json({ error: 'Email and role are required' }, { status: 400 });
+    if (!email || !password || !role) {
+      return NextResponse.json({ error: 'Email, password, and role are required' }, { status: 400 });
+    }
+
+    if (!isPasswordStrong(password)) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters with uppercase, lowercase, number, and special character' }, { status: 400 });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -51,9 +60,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
     }
 
+    const hashedPassword = await hashPassword(password);
+
     const user = await prisma.user.create({
       data: {
         email,
+        password: hashedPassword,
         role,
       },
     });
