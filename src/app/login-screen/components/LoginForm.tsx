@@ -10,10 +10,6 @@ import {
   EyeOff,
   Mail,
   Lock,
-  Copy,
-  Check,
-  Shield,
-  Users,
   ArrowRight,
   UserPlus,
 } from 'lucide-react';
@@ -26,23 +22,11 @@ interface LoginFormData {
   rememberMe: boolean;
 }
 
-const DEMO_CREDENTIALS = {
-  admin: {
-    email: 'admin@hhswelfare.co.ke',
-    password: 'Admin123!',
-  },
-  member: {
-    email: 'onangoa@gmail.com',
-    password: 'Member123!',
-  },
-};
-
 export default function LoginForm() {
   const router = useRouter();
   const { setUser: setContextUser } = useUser();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const {
     register,
@@ -239,115 +223,6 @@ export default function LoginForm() {
             )}
           </button>
         </form>
-
-        {/* Demo Credentials Box */}
-        <div className="mt-6 space-y-3">
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Shield size={14} className="text-blue-600" />
-                <p className="text-sm font-semibold text-blue-800">Admin Credentials</p>
-              </div>
-              <button
-                onClick={() => {
-                  setValue('email', DEMO_CREDENTIALS.admin.email);
-                  setValue('password', DEMO_CREDENTIALS.admin.password);
-                }}
-                className="text-xs font-semibold text-blue-700 bg-blue-100 hover:bg-blue-200 px-2.5 py-1 rounded-md transition-colors"
-              >
-                Use Admin
-              </button>
-            </div>
-            <div className="space-y-2">
-              {[
-                { field: 'email' as const, label: 'Email', value: DEMO_CREDENTIALS.admin.email },
-                {
-                  field: 'password' as const,
-                  label: 'Password',
-                  value: DEMO_CREDENTIALS.admin.password,
-                },
-              ].map(({ field, label, value }) => (
-                <div
-                  key={`admin-${field}`}
-                  className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-blue-100"
-                >
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium">{label}</p>
-                    <p className="text-sm font-mono text-foreground">{value}</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(value);
-                      setCopiedField(`admin-${field}`);
-                      setTimeout(() => setCopiedField(null), 2000);
-                    }}
-                    className="text-blue-500 hover:text-blue-700 transition-colors p-1.5 rounded-md hover:bg-blue-50"
-                    title={`Copy ${label}`}
-                  >
-                    {copiedField === `admin-${field}` ? (
-                      <Check size={14} className="text-green-600" />
-                    ) : (
-                      <Copy size={14} />
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Users size={14} className="text-green-600" />
-                <p className="text-sm font-semibold text-green-800">Member Credentials</p>
-              </div>
-              <button
-                onClick={() => {
-                  setValue('email', DEMO_CREDENTIALS.member.email);
-                  setValue('password', DEMO_CREDENTIALS.member.password);
-                }}
-                className="text-xs font-semibold text-green-700 bg-green-100 hover:bg-green-200 px-2.5 py-1 rounded-md transition-colors"
-              >
-                Use Member
-              </button>
-            </div>
-            <div className="space-y-2">
-              {[
-                { field: 'email' as const, label: 'Email', value: DEMO_CREDENTIALS.member.email },
-                {
-                  field: 'password' as const,
-                  label: 'Password',
-                  value: DEMO_CREDENTIALS.member.password,
-                },
-              ].map(({ field, label, value }) => (
-                <div
-                  key={`member-${field}`}
-                  className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-green-100"
-                >
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium">{label}</p>
-                    <p className="text-sm font-mono text-foreground">{value}</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(value);
-                      setCopiedField(`member-${field}`);
-                      setTimeout(() => setCopiedField(null), 2000);
-                    }}
-                    className="text-green-500 hover:text-green-700 transition-colors p-1.5 rounded-md hover:bg-green-50"
-                    title={`Copy ${label}`}
-                  >
-                    {copiedField === `member-${field}` ? (
-                      <Check size={14} className="text-green-600" />
-                    ) : (
-                      <Copy size={14} />
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
 
         {/* Register link */}
         <div className="mt-6 text-center">
