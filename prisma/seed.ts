@@ -28,7 +28,7 @@ async function main() {
         stateDepartment: 'State Dept. of ICT',
         payrollNumber: 'ADMIN/001',
         phoneNumber: '0700000000',
-        email: 'admin@memberreg.com',
+        email: 'admin@hhswelfare.co.ke',
         postalAddress: 'P.O. Box 00000, Nairobi',
         hasAgreedToTerms: true,
         employmentStatus: 'IN_SERVICE',
@@ -54,7 +54,7 @@ async function main() {
 
     const adminUser = await prisma.user.create({
       data: {
-        email: 'admin@memberreg.com',
+        email: 'admin@hhswelfare.co.ke',
         password: adminPassword,
         role: 'ADMIN',
         memberId: adminMember.id,
@@ -67,7 +67,7 @@ async function main() {
     console.log('\n========================================');
     console.log('🔑 Admin Credentials:');
     console.log('========================================');
-    console.log('  Email:    admin@memberreg.com');
+    console.log('  Email:    admin@hhswelfare.co.ke');
     console.log('  Password: Admin123!');
     console.log('========================================');
     console.log('\n⚠️  Please change the default password after first login!\n');

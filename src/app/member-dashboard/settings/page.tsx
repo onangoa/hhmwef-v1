@@ -161,7 +161,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-blue-800 mb-2">
                     Contact the administrator if you need assistance with your account.
                   </p>
-                  <p className="text-xs text-blue-700 font-medium">support@memberreg.org</p>
+                  <p className="text-xs text-blue-700 font-medium">support@hhswelfare.co.ke</p>
                 </div>
               </div>
             </div>

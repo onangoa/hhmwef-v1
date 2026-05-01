@@ -28,7 +28,7 @@ interface LoginFormData {
 
 const DEMO_CREDENTIALS = {
   admin: {
-    email: 'admin@memberreg.com',
+    email: 'admin@hhswelfare.co.ke',
     password: 'Admin123!',
   },
   member: {

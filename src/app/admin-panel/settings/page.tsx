@@ -158,7 +158,7 @@ export default function AdminSettingsPage() {
                   <p className="text-xs text-blue-800 mb-2">
                     Contact the system administrator if you need assistance with your account.
                   </p>
-                  <p className="text-xs text-blue-700 font-medium">admin@memberreg.org</p>
+                  <p className="text-xs text-blue-700 font-medium">admin@hhswelfare.co.ke</p>
                 </div>
               </div>
             </div>
