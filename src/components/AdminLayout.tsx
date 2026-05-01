@@ -97,6 +97,13 @@ const NAV_ITEMS: NavItem[] = [
     href: '/admin-panel/settings',
     group: 'system',
   },
+  {
+    id: 'nav-admin-users',
+    label: 'Admin Users',
+    icon: User,
+    href: '/admin-panel/admin-users',
+    group: 'system',
+  },
 ];
 
 interface AdminLayoutProps {
