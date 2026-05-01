@@ -40,7 +40,7 @@ export default function PendingVerificationPage() {
   const fetchPendingMembers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/members?status=INACTIVE');
+      const response = await fetch('/api/members?status=INACTIVE&limit=1000');
       if (response.ok) {
         const data = await response.json();
         const mappedMembers = (data.members || []).map((m: any, i: number) =>
