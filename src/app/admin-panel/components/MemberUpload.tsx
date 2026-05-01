@@ -90,7 +90,7 @@ function validateRow(row: string[], headers: string[], rowIndex: number): Parsed
   if (!department) errors.push('Department is required');
   if (!payrollNumber) errors.push('Payroll Number is required');
   if (!phone) errors.push('Phone is required');
-  else if (!/^0[17]\d{8}$/.test(phone)) errors.push('Phone must be a valid Kenyan number');
+  else if (!/^(0[17]\d{8}|254[17]\d{9})$/.test(phone)) errors.push('Phone must be a valid Kenyan number');
   if (!email) errors.push('Email is required');
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email is invalid');
 

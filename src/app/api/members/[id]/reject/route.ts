@@ -15,7 +15,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: 'Member not found' }, { status: 404 });
     }
 
-    if (member.memberStatus === 'REJECTED') {
+    if (member.memberStatus === 'SUSPENDED') {
       return NextResponse.json({ error: 'Member is already rejected' }, { status: 400 });
     }
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const updatedMember = await prisma.member.update({
       where: { id: params.id },
       data: {
-        memberStatus: 'REJECTED',
+        memberStatus: 'SUSPENDED',
         rejectionDate: new Date(),
         rejectedBy,
         rejectionReason: reason,

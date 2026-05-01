@@ -25,6 +25,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 import StatusBadge from '@/components/ui/StatusBadge';
 import MemberDetailModal, { MemberRecord } from './MemberDetailModal';
 import { getUser } from '@/lib/auth-client';
@@ -130,6 +131,87 @@ export default function MembersTable({ members, loading, onRefresh }: MembersTab
     }
   };
 
+  const handleBulkVerify = async () => {
+    if (selectedRows.length === 0) return;
+    try {
+      setIsUpdating(true);
+      const promises = selectedRows.map((id) =>
+        fetch(`/api/members/${id}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            approvedBy: user?.email || 'admin',
+            role: 'MEMBER',
+          }),
+        })
+      );
+      const responses = await Promise.all(promises);
+      const successCount = responses.filter((r) => r.ok).length;
+      toast.success(`${successCount} member${successCount !== 1 ? 's' : ''} verified successfully`);
+      onRefresh();
+      setSelectedRows([]);
+    } catch (error) {
+      console.error('Error bulk verifying:', error);
+      toast.error('Failed to verify some members');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleBulkReject = async () => {
+    if (selectedRows.length === 0) return;
+    try {
+      setIsUpdating(true);
+      const promises = selectedRows.map((id) =>
+        fetch(`/api/members/${id}/reject`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
+      const responses = await Promise.all(promises);
+      const successCount = responses.filter((r) => r.ok).length;
+      toast.success(`${successCount} member${successCount !== 1 ? 's' : ''} rejected successfully`);
+      onRefresh();
+      setSelectedRows([]);
+    } catch (error) {
+      console.error('Error bulk rejecting:', error);
+      toast.error('Failed to reject some members');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleExportExcel = () => {
+    try {
+      const exportData = filtered.map((member) => ({
+        'Registration No': member.registrationNo,
+        'First Name': member.firstName,
+        'Last Name': member.lastName,
+        'ID Number': member.idNumber,
+        'Ministry': member.ministry,
+        'Department': member.department,
+        'Payroll Number': member.payrollNumber,
+        'Phone': member.phone,
+        'Email': member.email,
+        'Status': member.status.charAt(0).toUpperCase() + member.status.slice(1),
+        'Registered At': member.registeredAt,
+        'Next of Kin Count': member.nextOfKinCount,
+        'Has Spouse': member.hasSpouse ? 'Yes' : 'No',
+        'Children Count': member.childrenCount,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Members');
+
+      XLSX.writeFile(workbook, 'members_export.xlsx');
+      toast.success('Members exported successfully');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export members');
+    }
+  };
+
   const handleStatusChange = async (id: string, status: MemberRecord['status']) => {
     try {
       setIsUpdating(true);
@@ -187,9 +269,14 @@ export default function MembersTable({ members, loading, onRefresh }: MembersTab
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground bg-muted hover:bg-secondary px-3 py-1.5 rounded-lg transition-all duration-150">
+            <button
+              onClick={handleExportExcel}
+              disabled={filtered.length === 0}
+              className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Export members to Excel file"
+            >
               <Download size={13} />
-              Export
+              <span>Export to Excel</span>
             </button>
             <button
               onClick={onRefresh}
@@ -197,7 +284,7 @@ export default function MembersTable({ members, loading, onRefresh }: MembersTab
               className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all duration-150 disabled:opacity-50"
             >
               <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-              Refresh
+              <span>Refresh</span>
             </button>
           </div>
         </div>
@@ -263,13 +350,21 @@ export default function MembersTable({ members, loading, onRefresh }: MembersTab
             {selectedRows.length} member{selectedRows.length > 1 ? 's' : ''} selected
           </span>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 px-3 py-1.5 rounded-lg transition-colors">
+            <button
+              onClick={handleBulkVerify}
+              disabled={isUpdating}
+              className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <CheckCircle2 size={12} />
-              Bulk Verify
+              {isUpdating ? 'Verifying...' : 'Bulk Verify'}
             </button>
-            <button className="flex items-center gap-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors">
+            <button
+              onClick={handleBulkReject}
+              disabled={isUpdating}
+              className="flex items-center gap-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <XCircle size={12} />
-              Bulk Reject
+              {isUpdating ? 'Rejecting...' : 'Bulk Reject'}
             </button>
           </div>
           <button
