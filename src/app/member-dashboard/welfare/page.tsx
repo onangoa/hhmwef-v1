@@ -46,7 +46,7 @@ export default function WelfareCasesPage() {
   const fetchCases = async () => {
     try {
       if (user?.member?.id) {
-        const response = await fetch(`/api/welfare-cases?memberId=${user.member.id}`);
+        const response = await fetch(`/api/welfare-cases?memberId=${user.member.id}&limit=10000`);
         if (response.ok) {
           const data = await response.json();
           setCases(data.cases || []);

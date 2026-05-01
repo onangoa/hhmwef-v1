@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Loader2,
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { toast } from 'sonner';
 import ContributionDetailModal from './ContributionDetailModal';
 import { getUser } from '@/lib/auth-client';
@@ -207,6 +208,40 @@ export default function ContributionsTable({
   const thClass =
     'px-3 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap cursor-pointer hover:text-foreground select-none';
 
+  const handleExportExcel = () => {
+    try {
+      const exportData = filtered.map((c) => ({
+        'Amount': c.amount,
+        'Payment Method': c.paymentMethod,
+        'M-Pesa Confirmation': c.mpesaConfirmation || 'N/A',
+        'Reference': c.reference || 'N/A',
+        'Month': c.month,
+        'Year': c.year,
+        'Status': STATUS_LABELS[c.status],
+        'Arrears': c.arrears,
+        'Penalty': c.penalty,
+        'Verified By': c.verifiedBy || 'N/A',
+        'Verified At': c.verifiedAt ? formatDate(c.verifiedAt) : 'N/A',
+        'Created At': formatDate(c.createdAt),
+        'Member Name': `${c.member.firstName} ${c.member.lastName}`,
+        'Payroll Number': c.member.payrollNumber,
+        'Ministry': c.member.ministry,
+        'Email': c.member.email || 'N/A',
+        'Phone': c.member.phoneNumber || 'N/A',
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Contributions');
+
+      XLSX.writeFile(workbook, 'contributions_export.xlsx');
+      toast.success('Contributions exported successfully');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export contributions');
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl border border-border shadow-card overflow-hidden">
       <div className="px-5 py-4 border-b border-border">
@@ -218,9 +253,14 @@ export default function ContributionsTable({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground bg-muted hover:bg-secondary px-3 py-1.5 rounded-lg transition-all duration-150">
+            <button
+              onClick={handleExportExcel}
+              disabled={filtered.length === 0}
+              className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Export contributions to Excel file"
+            >
               <Download size={13} />
-              Export
+              <span>Export to Excel</span>
             </button>
             <button
               onClick={onRefresh}
@@ -228,7 +268,7 @@ export default function ContributionsTable({
               className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all duration-150 disabled:opacity-50"
             >
               <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-              Refresh
+              <span>Refresh</span>
             </button>
           </div>
         </div>

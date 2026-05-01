@@ -41,6 +41,7 @@ export default function ContributionsPage() {
       setLoading(true);
       const params = new URLSearchParams();
       if (statusFilter) params.append('status', statusFilter);
+      params.append('limit', '10000');
 
       const response = await fetch(`/api/contributions?${params.toString()}`);
       if (response.ok) {

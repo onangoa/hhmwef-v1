@@ -44,7 +44,7 @@ export default function ContributionsPage() {
   const fetchContributions = async () => {
     try {
       if (user?.member?.id) {
-        const response = await fetch(`/api/contributions?memberId=${user.member.id}`);
+        const response = await fetch(`/api/contributions?memberId=${user.member.id}&limit=10000`);
         if (response.ok) {
           const data = await response.json();
           setContributions(data.contributions || []);
