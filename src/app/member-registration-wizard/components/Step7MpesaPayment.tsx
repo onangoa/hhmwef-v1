@@ -45,13 +45,13 @@ const MPESA_STEPS = [
     id: 'mpesa-step-4',
     step: '4',
     title: 'Enter Account Number',
-    detail: 'Enter your personal account number as provided by the group administrator.',
+    detail: 'Account Number: 01134200596700',
   },
   {
     id: 'mpesa-step-5',
     step: '5',
     title: 'Enter Amount',
-    detail: 'Input the membership registration amount as advised.',
+    detail: 'Enter Amount: 1000',
   },
   {
     id: 'mpesa-step-6',
@@ -70,13 +70,14 @@ const MPESA_STEPS = [
     step: '8',
     title: 'Receive Confirmation SMS',
     detail:
-      'You will receive a confirmation SMS from M-Pesa and Co-op Bank. Copy and paste the full message below.',
+      'You will receive a confirmation SMS from M-Pesa and Co-op Bank. Copy and paste the transaction code below.',
   },
 ];
 
 export default function Step7MpesaPayment({ onSubmit, onBack, isSubmitting }: Step7Props) {
   const [instructionsExpanded, setInstructionsExpanded] = useState(true);
   const [copiedPaybill, setCopiedPaybill] = useState(false);
+  const [copiedAccount, setCopiedAccount] = useState(false);
 
   const {
     register,
@@ -88,6 +89,12 @@ export default function Step7MpesaPayment({ onSubmit, onBack, isSubmitting }: St
     await navigator.clipboard.writeText('400200');
     setCopiedPaybill(true);
     setTimeout(() => setCopiedPaybill(false), 2000);
+  };
+
+  const handleCopyAccount = async () => {
+    await navigator.clipboard.writeText('01134200596700');
+    setCopiedAccount(true);
+    setTimeout(() => setCopiedAccount(false), 2000);
   };
 
   return (
@@ -116,7 +123,7 @@ export default function Step7MpesaPayment({ onSubmit, onBack, isSubmitting }: St
           Co-op Bank Pay Bill Number
         </p>
         <div className="flex items-center justify-between">
-          <span className="text-3xl font-bold tabular-nums tracking-wider">400200</span>
+          <span className="text-xl font-bold tabular-nums tracking-wider">400200</span>
           <button
             type="button"
             onClick={handleCopyPaybill}
@@ -135,9 +142,33 @@ export default function Step7MpesaPayment({ onSubmit, onBack, isSubmitting }: St
             )}
           </button>
         </div>
-        <p className="text-blue-200 text-xs mt-2">
-          Use this number when paying via M-Pesa Pay Bill
+      </div>
+
+      {/* Account Number highlight card */}
+      <div className="mb-6 p-4 bg-gradient-to-r from-blue-700 to-blue-800 rounded-xl text-white">
+        <p className="text-blue-200 text-xs font-semibold uppercase tracking-widest mb-1">
+          Account Number
         </p>
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-bold tabular-nums tracking-wider">01134200596700</span>
+          <button
+            type="button"
+            onClick={handleCopyAccount}
+            className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150"
+          >
+            {copiedAccount ? (
+              <>
+                <Check size={14} />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy size={14} />
+                Copy
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* M-Pesa Instructions Accordion */}
@@ -186,20 +217,20 @@ export default function Step7MpesaPayment({ onSubmit, onBack, isSubmitting }: St
             htmlFor="mpesaConfirmation"
             className="block text-sm font-semibold text-foreground mb-1.5"
           >
-            M-Pesa Confirmation Message <span className="text-red-500">*</span>
+            M-Pesa Confirmation Code <span className="text-red-500">*</span>
           </label>
           <p className="text-xs text-muted-foreground mb-2">
-            Paste the full SMS confirmation message you received from M-Pesa and Co-op Bank after
+            Paste the confirmation code you received after
             completing your payment.
           </p>
           <textarea
             id="mpesaConfirmation"
             rows={6}
-            placeholder={`Example:\nXXXXXXXXXX Confirmed. Ksh500.00 sent to CO-OP BANK 400200 Account PR/2024/00123 on 24/4/26 at 9:15 AM. New M-PESA balance is Ksh1,234.00. Transaction cost, Ksh0.00.`}
+            placeholder={`Example:\nXXXXXXXXXX`}
             {...register('mpesaConfirmation', {
               required: 'Please paste your M-Pesa confirmation message to proceed',
               minLength: {
-                value: 30,
+                value: 9,
                 message: 'The confirmation message seems too short — please paste the full SMS',
               },
             })}

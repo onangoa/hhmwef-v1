@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Await the params to get the id
+    const { id } = await params;
+
     const welfareCase = await prisma.welfareCase.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         member: true,
         committeeDecisions: {
@@ -57,13 +60,16 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const body = await request.json();
+    
+    // Await the params to get the id
+    const { id } = await params;
 
     // Check if welfare case exists and is still pending
     const existingCase = await prisma.welfareCase.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingCase) {
@@ -77,7 +83,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     const welfareCase = await prisma.welfareCase.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         type: body.type,
         title: body.title,
@@ -98,12 +104,15 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const body = await request.json();
+    
+    // Await the params to get the id
+    const { id } = await params;
 
     const welfareCase = await prisma.welfareCase.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: body.status,
         amountApproved: body.amountApproved,
@@ -124,10 +133,13 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Await the params to get the id
+    const { id } = await params;
+
     await prisma.welfareCase.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Welfare case deleted successfully' });

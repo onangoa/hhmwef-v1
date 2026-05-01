@@ -331,7 +331,7 @@ export default function ReportsPage() {
                             }`}
                           >
                             <span className="text-xs font-bold text-muted-foreground uppercase">{months[month - 1]}</span>
-                            <p className={`text-2xl font-black mt-1 ${count > 0 ? 'text-blue-700' : 'text-foreground/40'}`}>
+                            <p className={`text-xl font-bold mt-1 ${count > 0 ? 'text-blue-700' : 'text-foreground/40'}`}>
                               {count}
                             </p>
                           </div>
@@ -345,26 +345,26 @@ export default function ReportsPage() {
 
             {activeReport === 'contributions' && data?.contributions && (
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white p-6 rounded-2xl border border-border shadow-sm">
-                    <p className="text-sm font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Total Collected</p>
-                    <p className="text-3xl font-black text-blue-700">
-                      KES {(data.contributions.total || 0).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="bg-white p-6 rounded-2xl border border-border shadow-sm">
-                    <p className="text-sm font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Filtered Count</p>
-                    <p className="text-3xl font-black text-foreground">
-                      {data.contributions.details?.length || 0}
-                    </p>
-                  </div>
-                  <div className="bg-white p-6 rounded-2xl border border-border shadow-sm">
-                    <p className="text-sm font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Avg. Per Member</p>
-                    <p className="text-3xl font-black text-green-600">
-                      KES {(data.contributions.averagePerMember || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                    </p>
-                  </div>
-                </div>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   <div className="bg-white p-6 rounded-2xl border border-border shadow-sm">
+                     <p className="text-sm font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Total Collected</p>
+                      <p className="text-xl font-bold text-blue-700">
+                        KES {(data.contributions.total || 0).toLocaleString()}
+                      </p>
+                   </div>
+                   <div className="bg-white p-6 rounded-2xl border border-border shadow-sm">
+                     <p className="text-sm font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Filtered Count</p>
+                      <p className="text-xl font-bold text-foreground">
+                        {data.contributions.details?.length || 0}
+                      </p>
+                   </div>
+                   <div className="bg-white p-6 rounded-2xl border border-border shadow-sm">
+                     <p className="text-sm font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Avg. Per Member</p>
+                      <p className="text-xl font-bold text-green-600">
+                        KES {(data.contributions.averagePerMember || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </p>
+                   </div>
+                 </div>
 
                 <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
                   <div className="px-6 py-4 border-b border-border flex items-center justify-between">
@@ -388,7 +388,7 @@ export default function ReportsPage() {
                             <td className="px-6 py-4">
                               <p className="text-sm font-bold">{c.member.firstName} {c.member.lastName}</p>
                             </td>
-                            <td className="px-6 py-4 text-sm font-black text-right">KES {Number(c.amount).toLocaleString()}</td>
+                             <td className="px-6 py-4 text-sm font-bold">KES {Number(c.amount).toLocaleString()}</td>
                             <td className="px-6 py-4 text-sm text-muted-foreground">{c.month}/{c.year}</td>
                             <td className="px-6 py-4">
                               <StatusBadge status={getStatusBadgeType(c.status)} />
@@ -414,15 +414,15 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                    <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl text-center">
                     <p className="text-sm font-bold text-amber-800 uppercase mb-1">Pending Cases</p>
-                    <p className="text-4xl font-black text-amber-900">{data.welfareCases.byStatus.PENDING || 0}</p>
+                     <p className="text-xl font-bold text-amber-900">{data.welfareCases.byStatus.PENDING || 0}</p>
                   </div>
                   <div className="bg-green-50 border border-green-200 p-6 rounded-2xl text-center">
                     <p className="text-sm font-bold text-green-800 uppercase mb-1">Approved</p>
-                    <p className="text-4xl font-black text-green-900">{data.welfareCases.byStatus.APPROVED || 0}</p>
+                     <p className="text-xl font-bold text-green-900">{data.welfareCases.byStatus.APPROVED || 0}</p>
                   </div>
                   <div className="bg-blue-50 border border-blue-200 p-6 rounded-2xl text-center">
                     <p className="text-sm font-bold text-blue-800 uppercase mb-1">Total Filtered</p>
-                    <p className="text-4xl font-black text-blue-900">{data.welfareCases.details?.length || 0}</p>
+                     <p className="text-xl font-bold text-blue-900">{data.welfareCases.details?.length || 0}</p>
                   </div>
                 </div>
 
@@ -451,7 +451,7 @@ export default function ReportsPage() {
                             </td>
                             <td className="px-6 py-4 text-sm font-semibold">{wc.type}</td>
                             <td className="px-6 py-4 text-sm font-bold text-right">KES {Number(wc.amountRequested).toLocaleString()}</td>
-                            <td className="px-6 py-4 text-sm font-bold text-right text-green-600">KES {Number(wc.amountApproved).toLocaleString()}</td>
+                             <td className="px-6 py-4 text-sm font-bold text-right">KES {Number(wc.amountApproved).toLocaleString()}</td>
                             <td className="px-6 py-4">
                               <StatusBadge status={getStatusBadgeType(wc.status)} />
                             </td>
@@ -491,7 +491,7 @@ function StatCard({ title, value, icon: Icon, color }: { title: string; value: s
         <Icon size={24} className="text-white" />
       </div>
       <div>
-        <p className="text-3xl font-black text-foreground tabular-nums">
+        <p className="text-xl font-bold text-foreground tabular-nums">
           {value}
         </p>
         <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{title}</p>

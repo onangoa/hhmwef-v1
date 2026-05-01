@@ -158,8 +158,8 @@ export async function POST(request: NextRequest) {
         parentGuardians: true,
         parentsInLaws: true,
       },
-    });
-
+});
+ 
     return NextResponse.json(member, { status: 201 });
   } catch (error) {
     console.error('Error creating member:', error);

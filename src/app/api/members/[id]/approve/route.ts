@@ -45,7 +45,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     // Trigger notification and email
     try {
-      await notifyMemberApproved(updatedMember.id);
+      await notifyMemberApproved(updatedMember.id, defaultPassword);
     } catch (notifyError) {
       console.error('Error triggering approval notification:', notifyError);
     }

@@ -4,6 +4,7 @@
 // Import this file in any server action or API route to create notifications
 
 import { createUserNotification, NotificationTemplates } from '@/lib/notifications';
+import { sendEmailAsync } from '@/lib/email';
 
 // Example: Creating a notification when a member makes a contribution
 export async function notifyContributionReceived(memberId: string) {
@@ -40,15 +41,40 @@ export async function notifyWelfareCaseApproved(memberId: string) {
 }
 
 // Example: Creating a notification when member is approved
-export async function notifyMemberApproved(memberId: string) {
+export async function notifyMemberApproved(memberId: string, password?: string) {
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: { email: true, firstName: true }
+  });
+
   await createUserNotification({
     memberId,
     type: 'SUCCESS',
     title: 'Membership Approved',
-    message: 'Your membership has been approved. Welcome to the SACCO!',
+    message: 'Your membership has been approved. Welcome to the HHS Welfare!',
     icon: '🎉',
     link: '/member-dashboard',
   });
+
+  if (member && member.email && password) {
+    sendEmailAsync({
+      to: member.email,
+      subject: 'HHS Welfare: Membership Approved',
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; color: #333;">
+          <h2 style="color: #1d4ed8;">Membership Approved</h2>
+          <p>Hello ${member.firstName},</p>
+          <p>Your membership has been approved. Welcome to the HHS Welfare!</p>
+          <p><strong>Login Details:</strong></p>
+          <p>Email: ${member.email}<br>Password: ${password}</p>
+          <p>Please log in and change your password.</p>
+          <p><a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/member-dashboard" style="display: inline-block; padding: 10px 20px; background-color: #1d4ed8; color: white; text-decoration: none; border-radius: 5px;">Login Now</a></p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="font-size: 12px; color: #666;">This is an automated notification from HHS Welfare System.</p>
+        </div>
+      `
+    });
+  }
 }
 
 // Example: Creating a notification when member is rejected

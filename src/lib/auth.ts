@@ -13,7 +13,26 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 }
 
 export function generateDefaultPassword(): string {
-  return 'Member123!';
+  const chars = {
+    uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    lowercase: 'abcdefghijklmnopqrstuvwxyz',
+    numbers: '0123456789',
+    special: '!@#$%'
+  };
+
+  let password = '';
+
+  password += chars.uppercase[Math.floor(Math.random() * chars.uppercase.length)];
+  password += chars.lowercase[Math.floor(Math.random() * chars.lowercase.length)];
+  password += chars.numbers[Math.floor(Math.random() * chars.numbers.length)];
+  password += chars.special[Math.floor(Math.random() * chars.special.length)];
+
+  const allChars = chars.uppercase + chars.lowercase + chars.numbers + chars.special;
+  for (let i = 0; i < 4; i++) {
+    password += allChars[Math.floor(Math.random() * allChars.length)];
+  }
+
+  return password.split('').sort(() => Math.random() - 0.5).join('');
 }
 
 export function isPasswordStrong(password: string): boolean {
