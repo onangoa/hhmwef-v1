@@ -90,10 +90,14 @@ export default function ChangePasswordForm() {
 
       // Redirect after a short delay
       setTimeout(() => {
-        if (isFirstLogin) {
-          router.push('/member-dashboard');
+        if (user?.role === 'ADMIN') {
+          router.push('/admin-panel');
         } else {
-          router.push('/member-dashboard/settings');
+          if (isFirstLogin) {
+            router.push('/member-dashboard');
+          } else {
+            router.push('/member-dashboard/settings');
+          }
         }
       }, 2000);
     } catch (error) {
